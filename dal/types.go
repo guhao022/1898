@@ -16,10 +16,19 @@ type User struct {
 	Email    string        `bson:"email" json:"email"`
 	Job      string        `bson:"job" json:"job"`
 	About    string        `bson:"about" json:"about"`
+	Token 	 *Token        `bson:"token" json:"token"`
 	Created  time.Time     `bson:"created" json:"created"`
 	Updated  time.Time     `bson:"updated" json:"updated"`
 	Deleted  time.Time     `bson:"deleted" json:"deleted"`
 }
+
+// 用户即时token
+type Token struct {
+	Token   string    `bson:"token" json:"token"`
+	Created time.Time     `bson:"created" json:"created"`
+	Expired  time.Time    `bson:"expired" json:"expired"`
+}
+
 
 // 注册码
 type Keys struct {
@@ -48,9 +57,10 @@ type Event struct {
 	Title   string          `bson:"title" json:"title"`   // 活动标题
 	Detail  string          `bson:"detail" json:"detail"` // 活动详情
 	Addr    string          `bson:"addr" json:"addr"`     // 活动地址
+	Price   int             `bson:"price" json:"price"`     // 活动价格
 	Total   int             `bson:"total" json:"total"`     // 允许总参加人数
-	//SignUp  []string 		`bson:"signup" json:"signup"` // 已报名的用户
 	SignUp  *list.List 		`bson:"signup" json:"signup"` // 已报名的用户
+	Start 	string       	`bson:"start" json:"start"`	//开始时间
 	Created time.Time       `bson:"created" json:"created"`
 	Updated time.Time       `bson:"updated" json:"updated"`
 	Deleted time.Time       `bson:"deleted" json:"deleted"`

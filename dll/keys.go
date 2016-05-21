@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 	"1898/dal"
+	"1898/utils/web"
 )
 
 // @name 生成注册码
@@ -11,12 +12,12 @@ func GetKey(w http.ResponseWriter, r *http.Request) {
 	uid := r.FormValue("uid")
 
 	if uid == "" {
-		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+		web.Errors(w, web.ErrMissParam("uid", ErrCode_MissParamUid))
 		return
 	}
 
 	if !IsObjectId(uid) {
-		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		web.Errors(w, web.ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
 		return
 	}
 
@@ -30,11 +31,11 @@ func GetKey(w http.ResponseWriter, r *http.Request) {
 
 	err := k.AddKey()
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		panic(err)
 		return
 	}
 
-	Push(w, "get key", map[string]string{"key": string(key)})
+	web.Push(w, "get key", map[string]string{"key": string(key)})
 
 }

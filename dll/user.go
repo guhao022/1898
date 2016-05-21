@@ -7,6 +7,7 @@ import (
 
 	"1898/dal"
 	"1898/utils"
+	"1898/utils/web"
 )
 
 //@name 检测邀请码
@@ -14,7 +15,7 @@ func CheckRegKey(w http.ResponseWriter, r *http.Request) {
 	key := strings.ToUpper(r.FormValue("key"))
 
 	if key == "" {
-		Errors(w, ErrMissParam("key", ErrCode_UserMissParamKey))
+		web.Errors(w, web.ErrMissParam("key", ErrCode_UserMissParamKey))
 
 		return
 	}
@@ -26,17 +27,17 @@ func CheckRegKey(w http.ResponseWriter, r *http.Request) {
 		k.Key = key
 		err := k.FindByKey()
 		if err != nil {
-			Errors(w, ErrForbidden("no registration key found", ErrCode_UserKeyNotFound))
+			web.Errors(w, web.ErrForbidden("no registration key found", ErrCode_UserKeyNotFound))
 			return
 		}
 
 		if k.UsedId != "" {
-			Errors(w, ErrForbidden("the key has been used", ErrCode_UserKeyUsed))
+			web.Errors(w, web.ErrForbidden("the key has been used", ErrCode_UserKeyUsed))
 			return
 		}
 	}
 
-	Push(w, "the invitation code is right", "ok")
+	web.Push(w, "the invitation code is right", "ok")
 }
 
 // @name 用户注册
@@ -58,13 +59,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 
 	if phone == "" {
-		Errors(w, ErrMissParam("phone", ErrCode_UserMissParamPhone))
+		web.Errors(w, web.ErrMissParam("phone", ErrCode_UserMissParamPhone))
 
 		return
 	}
 
 	if !utils.MatchPhone(phone) {
-		Errors(w, ErrForbidden("must be the correct phone number", ErrCode_UserPhoneNotMatch))
+		web.Errors(w, web.ErrForbidden("must be the correct phone number", ErrCode_UserPhoneNotMatch))
 
 		return
 	}
@@ -72,7 +73,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	pwd := r.FormValue("password")
 
 	if pwd == "" {
-		Errors(w, ErrMissParam("password", ErrCode_UserMissParamPassword))
+		web.Errors(w, web.ErrMissParam("password", ErrCode_UserMissParamPassword))
 
 		return
 	}
@@ -82,7 +83,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	key := strings.ToUpper(r.FormValue("key"))
 
 	if key == "" {
-		Errors(w, ErrMissParam("key", ErrCode_UserMissParamKey))
+		web.Errors(w, web.ErrMissParam("key", ErrCode_UserMissParamKey))
 
 		return
 	}
@@ -96,12 +97,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		k.Key = key
 		err := k.FindByKey()
 		if err != nil {
-			Errors(w, ErrForbidden("no registration key found", ErrCode_UserKeyNotFound))
+			web.Errors(w, web.ErrForbidden("no registration key found", ErrCode_UserKeyNotFound))
 			return
 		}
 
 		if k.UsedId != "" {
-			Errors(w, ErrForbidden("the key has been used", ErrCode_UserKeyUsed))
+			web.Errors(w, web.ErrForbidden("the key has been used", ErrCode_UserKeyUsed))
 			return
 		}
 
@@ -111,26 +112,31 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 		err = k.UpdateByKey(key)
 		if err != nil {
-			Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+			web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 			return
 		}
 
 	}
 
-	u := &dal.User{}
+	u := new(dal.User)
+
+	// 生成token
+	token := u.NewToken()
+
 	u.Id = id
 	u.Phone = phone
 	u.Password = password
+	u.Token = token
 	u.Created = time.Now()
 	u.Updated = time.Now()
 
 	err := u.AddUser()
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
-	Push(w, "register success", "ok")
+	web.Push(w, "register success", u)
 
 }
 
@@ -153,13 +159,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 
 	if phone == "" {
-		Errors(w, ErrMissParam("phone", ErrCode_UserMissParamPhone))
+		web.Errors(w, web.ErrMissParam("phone", ErrCode_UserMissParamPhone))
 
 		return
 	}
 
 	if !utils.MatchPhone(phone) {
-		Errors(w, ErrForbidden("must be the correct phone number", ErrCode_UserPhoneNotMatch))
+		web.Errors(w, web.ErrForbidden("must be the correct phone number", ErrCode_UserPhoneNotMatch))
 
 		return
 	}
@@ -167,7 +173,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	pwd := r.FormValue("password")
 
 	if pwd == "" {
-		Errors(w, ErrMissParam("password", ErrCode_UserMissParamPassword))
+		web.Errors(w, web.ErrMissParam("password", ErrCode_UserMissParamPassword))
 
 		return
 	}
@@ -181,12 +187,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err := u.Login()
 
 	if err != nil {
-		Errors(w, ErrForbidden("login failed", ErrCode_InternalServer))
+		web.Errors(w, web.ErrForbidden("login failed", ErrCode_InternalServer))
 
 		return
 	}
 
-	Push(w, "login success", u)
+	web.Push(w, "login success", u)
 }
 
 

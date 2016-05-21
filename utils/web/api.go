@@ -1,4 +1,4 @@
-package dll
+package web
 
 import (
 	"encoding/json"
@@ -90,31 +90,3 @@ func ErrUnauthorized(detail string, errcode int) *Error {
 		errcode,
 	}
 }
-
-const (
-	ErrCode_InternalServer = 500
-
-	ErrCode_MissParamUid = iota + 40001
-	ErrCode_UidNotObjectId
-	//
-	ErrCode_UserMissParamKey
-	ErrCode_UserKeyNotFound
-	ErrCode_UserKeyUsed
-	ErrCode_UserMissParamPhone
-	ErrCode_UserPhoneNotMatch
-	ErrCode_UserMissParamPassword
-	//
-	ErrCode_EventMissParamTitle
-	ErrCode_EventMissParamDetail
-	ErrCode_EventMissParamAddr
-	ErrCode_EventMissParamTotal
-	ErrCode_EventTotalNotInt
-	ErrCode_EventDetailLenNotEnough
-	ErrCode_UserAlreadySignUp
-	ErrCode_UserNotSignUp
-	ErrCode_EnrollmentFull
-	//
-	ErrCode_MissParamEid
-	ErrCode_EidNotObjectId
-
-)

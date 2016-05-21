@@ -6,6 +6,7 @@ import (
 	"1898/dal"
 	"time"
 	"1898/utils"
+	"1898/utils/web"
 )
 
 // @name 创建活动
@@ -29,20 +30,28 @@ func NewEvent (w http.ResponseWriter, r *http.Request) {
 	uid := r.FormValue("uid")
 
 	if uid == "" {
-		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+		web.Errors(w, web.ErrMissParam("uid", ErrCode_MissParamUid))
 
 		return
 	}
 
 	if !IsObjectId(uid) {
-		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		web.Errors(w, web.ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
 		return
 	}
 
 	title := r.FormValue("title")
 
 	if title == "" {
-		Errors(w, ErrMissParam("title", ErrCode_EventMissParamTitle))
+		web.Errors(w, web.ErrMissParam("title", ErrCode_EventMissParamTitle))
+
+		return
+	}
+
+	price, err := strconv.Atoi(r.FormValue("price"))
+
+	if err != nil {
+		web.Errors(w, web.ErrMissParam("price", ErrCode_EventMissParamPrice))
 
 		return
 	}
@@ -50,13 +59,13 @@ func NewEvent (w http.ResponseWriter, r *http.Request) {
 	detail := r.FormValue("detail")
 
 	if detail == "" {
-		Errors(w, ErrMissParam("detail", ErrCode_EventMissParamDetail))
+		web.Errors(w, web.ErrMissParam("detail", ErrCode_EventMissParamDetail))
 
 		return
 	}
 
 	if len(detail) < 10 {
-		Errors(w, ErrForbidden("detail must be at least 10", ErrCode_EventDetailLenNotEnough))
+		web.Errors(w, web.ErrForbidden("detail must be at least 10", ErrCode_EventDetailLenNotEnough))
 
 		return
 	}
@@ -64,23 +73,22 @@ func NewEvent (w http.ResponseWriter, r *http.Request) {
 	addr := r.FormValue("addr")
 
 	if addr == "" {
-		Errors(w, ErrMissParam("addr", ErrCode_EventMissParamAddr))
+		web.Errors(w, web.ErrMissParam("addr", ErrCode_EventMissParamAddr))
 
 		return
 	}
 
-	total := r.FormValue("total")
-
-	if total == "" {
-		Errors(w, ErrMissParam("total", ErrCode_EventMissParamTotal))
-
-		return
-	}
-
-	tn, err := strconv.Atoi(total);
+	total, err := strconv.Atoi(r.FormValue("total"))
 
 	if err != nil {
-		Errors(w, ErrForbidden("total must be int", ErrCode_EventTotalNotInt))
+		web.Errors(w, web.ErrMissParam("total", ErrCode_EventMissParamTotal))
+
+		return
+	}
+
+	start := r.FormValue("start")
+	if start == "" {
+		web.Errors(w, web.ErrMissParam("start", ErrCode_EventMissParamStart))
 
 		return
 	}
@@ -91,17 +99,129 @@ func NewEvent (w http.ResponseWriter, r *http.Request) {
 	event.Title = title
 	event.Detail = detail
 	event.Addr = addr
-	event.Total = tn
+	event.Price = price
+	event.Total = total
+	event.Start = start
 	event.Created = time.Now()
 
 	err = event.AddEvent()
 
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
-	Push(w, "create event success", "ok")
+	web.Push(w, "create event success", "ok")
+
+}
+
+//@name 修改活动
+func EditEvent(w http.ResponseWriter, r *http.Request) {
+
+	eid := r.FormValue("eid")
+
+	if eid == "" {
+		web.Errors(w, web.ErrMissParam("eid", ErrCode_MissParamEid))
+
+		return
+	}
+
+	if !IsObjectId(eid) {
+		web.Errors(w, web.ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
+		return
+	}
+
+	uid := r.FormValue("uid")
+
+	if uid == "" {
+		web.Errors(w, web.ErrMissParam("uid", ErrCode_MissParamUid))
+
+		return
+	}
+
+	if !IsObjectId(uid) {
+		web.Errors(w, web.ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	title := r.FormValue("title")
+
+	if title == "" {
+		web.Errors(w, web.ErrMissParam("title", ErrCode_EventMissParamTitle))
+
+		return
+	}
+
+	price, err := strconv.Atoi(r.FormValue("price"))
+
+	if err != nil {
+		web.Errors(w, web.ErrMissParam("price", ErrCode_EventMissParamPrice))
+
+		return
+	}
+
+	detail := r.FormValue("detail")
+
+	if detail == "" {
+		web.Errors(w, web.ErrMissParam("detail", ErrCode_EventMissParamDetail))
+
+		return
+	}
+
+	if len(detail) < 10 {
+		web.Errors(w, web.ErrForbidden("detail must be at least 10", ErrCode_EventDetailLenNotEnough))
+
+		return
+	}
+
+	addr := r.FormValue("addr")
+
+	if addr == "" {
+		web.Errors(w, web.ErrMissParam("addr", ErrCode_EventMissParamAddr))
+
+		return
+	}
+
+	total, err := strconv.Atoi(r.FormValue("total"))
+
+	if err != nil {
+		web.Errors(w, web.ErrMissParam("total", ErrCode_EventMissParamTotal))
+
+		return
+	}
+
+	var event = &dal.Event{}
+
+	event.Id = ObjectIdHex(eid)
+
+	err = event.FindByID()
+
+	if err != nil {
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	// 检测是否是创建人
+	if uid != event.Uid.Hex() {
+		web.Errors(w, web.ErrForbidden("not create user", ErrCode_EventNotCreateUser))
+
+		return
+	}
+
+	event.Title = title
+	event.Detail = detail
+	event.Addr = addr
+	event.Price = price
+	event.Total = total
+
+	err = event.UpdateById(eid)
+
+	if err != nil {
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	web.Push(w, "update event success", "ok")
 
 }
 
@@ -110,26 +230,28 @@ func EventInfo(w http.ResponseWriter, r *http.Request) {
 	eid := r.FormValue("eid")
 
 	if eid == "" {
-		Errors(w, ErrMissParam("eid", ErrCode_MissParamEid))
+		web.Errors(w, web.ErrMissParam("eid", ErrCode_MissParamEid))
 
 		return
 	}
 
 	if !IsObjectId(eid) {
-		Errors(w, ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
+		web.Errors(w, web.ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
 		return
 	}
 
 	var event = &dal.Event{}
 
+	event.Id = ObjectIdHex(eid)
+
 	err := event.FindByID()
 
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
-	Push(w, "event information", event)
+	web.Push(w, "event information", event)
 
 }
 
@@ -139,26 +261,26 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 	uid := r.FormValue("uid")
 
 	if uid == "" {
-		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+		web.Errors(w, web.ErrMissParam("uid", ErrCode_MissParamUid))
 
 		return
 	}
 
 	if !IsObjectId(uid) {
-		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		web.Errors(w, web.ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
 		return
 	}
 
 	eid := r.FormValue("eid")
 
 	if eid == "" {
-		Errors(w, ErrMissParam("eid", ErrCode_MissParamEid))
+		web.Errors(w, web.ErrMissParam("eid", ErrCode_MissParamEid))
 
 		return
 	}
 
 	if !IsObjectId(eid) {
-		Errors(w, ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
+		web.Errors(w, web.ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
 		return
 	}
 
@@ -168,14 +290,14 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 
 	err := event.FindByID()
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
 	//检测活动人数是否已满
 	total := event.SignUp.Len()
 	if total >= event.Total {
-		Errors(w, ErrForbidden("enrollment is full", ErrCode_EnrollmentFull))
+		web.Errors(w, web.ErrForbidden("enrollment is full", ErrCode_EnrollmentFull))
 		return
 	}
 
@@ -183,7 +305,7 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 	contain, _ := utils.ListContains(event.SignUp, uid)
 
 	if contain {
-		Errors(w, ErrForbidden("user already sign up", ErrCode_UserAlreadySignUp))
+		web.Errors(w, web.ErrForbidden("user already sign up", ErrCode_UserAlreadySignUp))
 		return
 	}
 
@@ -192,11 +314,11 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 	err = event.UpdateById(eid)
 
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
-	Push(w, "sign up event", "ok")
+	web.Push(w, "sign up event", "ok")
 
 }
 
@@ -207,11 +329,11 @@ func EventList(w http.ResponseWriter, r *http.Request) {
 	v, err := event.FindAll(0, 0, "created")
 
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
-	Push(w, "event list", v)
+	web.Push(w, "event list", v)
 }
 
 // @name 删除活动
@@ -219,13 +341,13 @@ func DelEvent(w http.ResponseWriter, r *http.Request) {
 	eid := r.FormValue("eid")
 
 	if eid == "" {
-		Errors(w, ErrMissParam("eid", ErrCode_MissParamEid))
+		web.Errors(w, web.ErrMissParam("eid", ErrCode_MissParamEid))
 
 		return
 	}
 
 	if !IsObjectId(eid) {
-		Errors(w, ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
+		web.Errors(w, web.ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
 		return
 	}
 
@@ -233,11 +355,11 @@ func DelEvent(w http.ResponseWriter, r *http.Request) {
 
 	err := event.DelById(eid)
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
-	Push(w, "event delete success", "ok")
+	web.Push(w, "event delete success", "ok")
 }
 
 // @name 取消参加活动
@@ -246,26 +368,26 @@ func CancelEvent(w http.ResponseWriter, r *http.Request) {
 	uid := r.FormValue("uid")
 
 	if uid == "" {
-		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+		web.Errors(w, web.ErrMissParam("uid", ErrCode_MissParamUid))
 
 		return
 	}
 
 	if !IsObjectId(uid) {
-		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		web.Errors(w, web.ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
 		return
 	}
 
 	eid := r.FormValue("eid")
 
 	if eid == "" {
-		Errors(w, ErrMissParam("eid", ErrCode_MissParamEid))
+		web.Errors(w, web.ErrMissParam("eid", ErrCode_MissParamEid))
 
 		return
 	}
 
 	if !IsObjectId(eid) {
-		Errors(w, ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
+		web.Errors(w, web.ErrForbidden("eid must be ObjectId format", ErrCode_EidNotObjectId))
 		return
 	}
 
@@ -275,7 +397,7 @@ func CancelEvent(w http.ResponseWriter, r *http.Request) {
 
 	err := event.FindByID()
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
@@ -283,13 +405,13 @@ func CancelEvent(w http.ResponseWriter, r *http.Request) {
 	contain, e := utils.ListContains(event.SignUp, uid)
 
 	if !contain {
-		Errors(w, ErrForbidden("user not sign up", ErrCode_UserNotSignUp))
+		web.Errors(w, web.ErrForbidden("user not sign up", ErrCode_UserNotSignUp))
 		return
 	}
 
 	eval := event.SignUp.Remove(e)
 
-	Push(w, "event cancel success", eval)
+	web.Push(w, "event cancel success", eval)
 }
 
 

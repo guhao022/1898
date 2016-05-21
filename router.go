@@ -22,11 +22,14 @@ func HttpRun(addr string) {
 
 	// event
 	r.Post("/event/new", dll.NewEvent)
+	r.Post("/event/edit", dll.EditEvent)
 	r.Post("/event/info", dll.EventInfo)
 	r.Post("/event/reg", dll.RegEvent)
 	r.Post("/event/list", dll.EventList)
 	r.Post("/event/del", dll.DelEvent)
 	r.Post("/event/cancel", dll.CancelEvent)
+
+	//f.AddMux(r)
 
 	log.CLog("[TRAC] Server start listen on # %s #\n", addr)
 

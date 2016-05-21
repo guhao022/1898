@@ -1,6 +1,8 @@
 package dll
 
-import "gopkg.in/mgo.v2/bson"
+import (
+	"gopkg.in/mgo.v2/bson"
+)
 
 func NewObjectId() bson.ObjectId {
 	return bson.NewObjectId()
