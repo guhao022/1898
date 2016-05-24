@@ -1,8 +1,47 @@
-package web
+package dll
 
 import (
-	"encoding/json"
 	"net/http"
+	"encoding/json"
+)
+
+const (
+	ErrCode_InternalServer = 500
+
+	ErrCode_MissParamToken = iota + 40010
+	ErrCode_TokenExpired
+	ErrCode_MissParamUid
+	ErrCode_UidNotObjectId
+	//
+	ErrCode_UserMissParamKey
+	ErrCode_UserKeyNotFound
+	ErrCode_UserKeyUsed
+	ErrCode_UserMissParamPhone
+	ErrCode_UserPhoneNotMatch
+	ErrCode_UserMissParamPassword
+	ErrCode_UpdateKeyErr
+	ErrCode_NickNameErr
+	//
+	ErrCode_EventMissParamTitle
+	ErrCode_EventMissParamDetail
+	ErrCode_EventMissParamAddr
+	ErrCode_EventMissParamStart
+	ErrCode_EventMissParamPrice
+	ErrCode_EventMissParamTotal
+	ErrCode_EventDetailLenNotEnough
+	ErrCode_UserAlreadySignUp
+	ErrCode_UserNotSignUp
+	ErrCode_EnrollmentFull
+	ErrCode_EventNotCreateUser
+	ErrCode_EventOrganizer
+	//
+	ErrCode_MissParamEid
+	ErrCode_EidNotObjectId
+	//
+	ErrCode_AddFriendErr
+	ErrCode_MissParamFid
+	ErrCode_FriendRepeat
+
 )
 
 type ERR_CODE int
@@ -21,8 +60,12 @@ type JSON struct {
 }
 
 func Push(w http.ResponseWriter, msg string, data interface{}) {
-
-	j := &JSON{"ok", msg, data, 0}
+	j := &JSON{
+		ID:"ok",
+		Msg:msg,
+		Data:data,
+		ErrCode:0,
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "application/json; charset=utf-8")
@@ -48,12 +91,6 @@ func Errors(w http.ResponseWriter, err *Error) {
 	w.Header().Set("content-type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(err)
 }
-
-var (
-	ErrBadRequest = &Error{"bad_request", "Bad request", "Request body is not well-formed. It must be JSON.", 400}
-	ErrNoData     = &Error{"no_data", "No data", `Key "data" in the top level of the JSON document is missing or contains no data`, 422}
-	ErrNotFound   = &Error{"not_found", "Not found", "Route not found.", 404}
-)
 
 func ErrMissParam(param string, errcode int) *Error {
 	return &Error{
@@ -90,3 +127,4 @@ func ErrUnauthorized(detail string, errcode int) *Error {
 		errcode,
 	}
 }
+

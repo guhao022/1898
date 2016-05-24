@@ -4,6 +4,7 @@ import (
 	"1898/utils"
 	"time"
 	"gopkg.in/mgo.v2/bson"
+	"errors"
 )
 
 // 新建token
@@ -39,7 +40,15 @@ func (t *User) FindTokenByUId() (*Token, error) {
 	c := t.mgo()
 
 	c.Query = bson.M{"_id": t.Id}
+
 	err := c.Find(&t)
+	if err != nil {
+		return nil, err
+	}
+
+	if t.Token == nil {
+		return nil, errors.New("the user's token is null")
+	}
 
 	return t.Token, err
 }

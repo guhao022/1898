@@ -3,37 +3,41 @@ package main
 import (
 	"1898/dll"
 	"1898/utils/log"
-	"1898/utils/web"
 	"net/http"
+	"github.com/urfave/negroni"
+	"github.com/gorilla/mux"
+	"1898/middleware/logg"
 )
 
 func HttpRun(addr string) {
-	web.SetTrac(true)
-	r := web.NewRoute()
 
-	// 路由
-	// user
-	r.Post("/user/regkey", dll.CheckRegKey)
-	r.Post("/user/register", dll.Register)
-	r.Post("/user/login", dll.Login)
+	r := mux.NewRouter()
+
+	r.HandleFunc("/login", dll.Login).Methods("POST", "GET")
+	r.HandleFunc("/register", dll.Register).Methods("POST")
+	r.HandleFunc("/regkey", dll.CheckRegKey).Methods("POST")
+
+	r.HandleFunc("/user/info", dll.GetUserByID)
 
 	// key
-	r.Post("/key/getkey", dll.GetKey)
+	r.HandleFunc("/key/getkey", dll.GetKey).Methods("POST", "GET")
 
 	// event
-	r.Post("/event/new", dll.NewEvent)
-	r.Post("/event/edit", dll.EditEvent)
-	r.Post("/event/info", dll.EventInfo)
-	r.Post("/event/reg", dll.RegEvent)
-	r.Post("/event/list", dll.EventList)
-	r.Post("/event/del", dll.DelEvent)
-	r.Post("/event/cancel", dll.CancelEvent)
+	r.HandleFunc("/event/new", dll.NewEvent).Methods("POST")
+	r.HandleFunc("/event/edit", dll.EditEvent).Methods("POST")
+	r.HandleFunc("/event/info", dll.EventInfo).Methods("POST")
+	r.HandleFunc("/event/reg", dll.RegEvent).Methods("POST")
+	r.HandleFunc("/event/list", dll.EventList).Methods("POST")
+	r.HandleFunc("/event/del", dll.DelEvent).Methods("POST")
+	r.HandleFunc("/event/cancel", dll.CancelEvent).Methods("POST")
 
-	//f.AddMux(r)
+	n := negroni.New()
+	n.Use(logg.New())
+	n.UseHandler(r)
 
 	log.CLog("[TRAC] Server start listen on # %s #\n", addr)
 
-	err := http.ListenAndServe(":"+addr, r)
+	err := http.ListenAndServe(":"+addr, n)
 
 	if err != nil {
 		panic(err)

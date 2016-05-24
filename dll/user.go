@@ -7,7 +7,6 @@ import (
 
 	"1898/dal"
 	"1898/utils"
-	"1898/utils/web"
 )
 
 //@name 检测邀请码
@@ -15,7 +14,7 @@ func CheckRegKey(w http.ResponseWriter, r *http.Request) {
 	key := strings.ToUpper(r.FormValue("key"))
 
 	if key == "" {
-		web.Errors(w, web.ErrMissParam("key", ErrCode_UserMissParamKey))
+		Errors(w, ErrMissParam("key", ErrCode_UserMissParamKey))
 
 		return
 	}
@@ -27,17 +26,17 @@ func CheckRegKey(w http.ResponseWriter, r *http.Request) {
 		k.Key = key
 		err := k.FindByKey()
 		if err != nil {
-			web.Errors(w, web.ErrForbidden("no registration key found", ErrCode_UserKeyNotFound))
+			Errors(w, ErrForbidden("no registration key found", ErrCode_UserKeyNotFound))
 			return
 		}
 
 		if k.UsedId != "" {
-			web.Errors(w, web.ErrForbidden("the key has been used", ErrCode_UserKeyUsed))
+			Errors(w, ErrForbidden("the key has been used", ErrCode_UserKeyUsed))
 			return
 		}
 	}
 
-	web.Push(w, "the invitation code is right", "ok")
+	Push(w, "the invitation code is right", "ok")
 }
 
 // @name 用户注册
@@ -59,13 +58,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 
 	if phone == "" {
-		web.Errors(w, web.ErrMissParam("phone", ErrCode_UserMissParamPhone))
+		Errors(w, ErrMissParam("phone", ErrCode_UserMissParamPhone))
 
 		return
 	}
 
 	if !utils.MatchPhone(phone) {
-		web.Errors(w, web.ErrForbidden("must be the correct phone number", ErrCode_UserPhoneNotMatch))
+		Errors(w, ErrForbidden("must be the correct phone number", ErrCode_UserPhoneNotMatch))
 
 		return
 	}
@@ -73,7 +72,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	pwd := r.FormValue("password")
 
 	if pwd == "" {
-		web.Errors(w, web.ErrMissParam("password", ErrCode_UserMissParamPassword))
+		Errors(w, ErrMissParam("password", ErrCode_UserMissParamPassword))
 
 		return
 	}
@@ -83,7 +82,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	key := strings.ToUpper(r.FormValue("key"))
 
 	if key == "" {
-		web.Errors(w, web.ErrMissParam("key", ErrCode_UserMissParamKey))
+		Errors(w, ErrMissParam("key", ErrCode_UserMissParamKey))
 
 		return
 	}
@@ -97,12 +96,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		k.Key = key
 		err := k.FindByKey()
 		if err != nil {
-			web.Errors(w, web.ErrForbidden("no registration key found", ErrCode_UserKeyNotFound))
+			Errors(w, ErrForbidden("no registration key found", ErrCode_UserKeyNotFound))
 			return
 		}
 
 		if k.UsedId != "" {
-			web.Errors(w, web.ErrForbidden("the key has been used", ErrCode_UserKeyUsed))
+			Errors(w, ErrForbidden("the key has been used", ErrCode_UserKeyUsed))
 			return
 		}
 
@@ -112,8 +111,30 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 		err = k.UpdateByKey(key)
 		if err != nil {
-			web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
+			Errors(w, ErrForbidden(err.Error(), ErrCode_UpdateKeyErr))
 			return
+		}
+
+		f := new(dal.Friends)
+		f.UId = id
+		f.Fid = k.UId
+		f.Agree = time.Now()
+		f.Created = time.Now()
+		if err = f.Add(); err != nil {
+			Errors(w, ErrForbidden(err.Error(), ErrCode_AddFriendErr))
+			return
+		} else {
+			f_id := NewObjectId()
+			f.Id = f_id
+			f.UId = k.UId
+			f.Fid = id
+			f.Agree = time.Now()
+			f.Created = time.Now()
+			err = f.Add()
+			if err != nil {
+				Errors(w, ErrForbidden(err.Error(), ErrCode_AddFriendErr))
+				return
+			}
 		}
 
 	}
@@ -132,11 +153,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	err := u.AddUser()
 	if err != nil {
-		web.Errors(w, web.ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
 
-	web.Push(w, "register success", u)
+	Push(w, "register success", u)
 
 }
 
@@ -159,13 +180,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 
 	if phone == "" {
-		web.Errors(w, web.ErrMissParam("phone", ErrCode_UserMissParamPhone))
+		Errors(w, ErrMissParam("phone", ErrCode_UserMissParamPhone))
 
 		return
 	}
 
 	if !utils.MatchPhone(phone) {
-		web.Errors(w, web.ErrForbidden("must be the correct phone number", ErrCode_UserPhoneNotMatch))
+		Errors(w, ErrForbidden("must be the correct phone number", ErrCode_UserPhoneNotMatch))
 
 		return
 	}
@@ -173,26 +194,55 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	pwd := r.FormValue("password")
 
 	if pwd == "" {
-		web.Errors(w, web.ErrMissParam("password", ErrCode_UserMissParamPassword))
+		Errors(w, ErrMissParam("password", ErrCode_UserMissParamPassword))
 
 		return
 	}
 
 	password := utils.Md5(utils.Md5(pwd))
 
-	u := &dal.User{}
+	u := new(dal.User)
 	u.Phone = phone
 	u.Password = password
 
 	err := u.Login()
 
 	if err != nil {
-		web.Errors(w, web.ErrForbidden("login failed", ErrCode_InternalServer))
+		Errors(w, ErrForbidden("login failed", ErrCode_InternalServer))
 
 		return
 	}
 
-	web.Push(w, "login success", u)
+	Push(w, "login success", u)
+}
+
+// 根据用户id获取用户信息
+func GetUserByID(w http.ResponseWriter, r *http.Request) {
+	uid := r.FormValue("uid")
+
+	if uid == "" {
+		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+
+		return
+	}
+
+	if !IsObjectId(uid) {
+		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	u := new(dal.User)
+	u.Id = ObjectIdHex(uid)
+
+	err := u.FindByID()
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "find user success", u)
+
 }
 
 
