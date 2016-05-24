@@ -84,8 +84,8 @@ func NewEvent (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start := r.FormValue("start")
-	if start == "" {
+	start, err := strconv.ParseInt(r.FormValue("start"), 10, 64)
+	if err != nil {
 		Errors(w, ErrMissParam("start", ErrCode_EventMissParamStart))
 
 		return
@@ -317,6 +317,13 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 是否已过报名期
+	now := time.Now().Unix()
+	if now - event.Start < 2 * 60 * 60 {
+		Errors(w, ErrForbidden("end of registration time", ErrCode_TimeOver))
+		return
+	}
+
 	// 检查是否为组织者
 	if ObjectIdHex(uid) == event.CreateUser.Id {
 		Errors(w, ErrInternalServer("the event organizer", ErrCode_EventOrganizer))
@@ -432,7 +439,7 @@ func CancelEvent(w http.ResponseWriter, r *http.Request) {
 
 	// 检测是否已经参加活动
 	if _, ok := event.SignUp[uid]; !ok{
-		Errors(w, ErrForbidden("user not join this event", ErrCode_UserAlreadySignUp))
+		Errors(w, ErrForbidden("user not join this event", ErrCode_UserNotSignUp))
 		return
 	}
 

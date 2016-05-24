@@ -29,6 +29,12 @@ func (u *User) Login() error {
 	c.Query = bson.M{"phone": u.Phone, "password": u.Password}
 	return c.Find(&u)
 }
+// 管理用户登录
+func (u *User) RootLogin() error {
+	c := u.mgo()
+	c.Query = bson.M{"username": u.Username, "password": u.Password, "root": 1}
+	return c.Find(&u)
+}
 
 // 用户查重
 func (u *User) CheckPhone() bool {

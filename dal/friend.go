@@ -35,6 +35,14 @@ func (f *Friends) FindByUFID() error {
 	return c.Find(&f)
 }
 
+// 根据ID获取好友信息
+func (f *Friends) FindByID() error {
+	c := f.mgo()
+	c.Query = bson.M{"_id": f.Id}
+
+	return c.Find(&f)
+}
+
 // 修改
 func (f *Friends) UpdateById(id string) error {
 	c := f.mgo()
@@ -47,6 +55,10 @@ func (f *Friends) UpdateById(id string) error {
 
 // 软删除
 func (f *Friends) DelByid(id string) error {
+	err := f.FindByID()
+	if err != nil {
+		return err
+	}
 	f.Deleted = time.Now()
 
 	return f.UpdateById(id)

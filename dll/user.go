@@ -145,9 +145,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	token := u.NewToken()
 
 	u.Id = id
+	u.Username = phone
 	u.Phone = phone
 	u.Password = password
 	u.Token = token
+	u.Root = 0
 	u.Created = time.Now()
 	u.Updated = time.Now()
 
@@ -160,6 +162,184 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	Push(w, "register success", u)
 
 }
+
+// @name 创建管理用户
+func CreateRoot(w http.ResponseWriter, r *http.Request) {
+	username := r.FormValue("username")
+
+	if username == "" {
+		Errors(w, ErrMissParam("phone", ErrCode_UserMissParamUsername))
+
+		return
+	}
+
+	pwd := r.FormValue("password")
+
+	if pwd == "" {
+		Errors(w, ErrMissParam("password", ErrCode_UserMissParamPassword))
+
+		return
+	}
+
+	password := utils.Md5(utils.Md5(pwd))
+
+
+
+	id := NewObjectId()
+
+	u := new(dal.User)
+
+	// 生成token
+	token := u.NewToken()
+
+	u.Id = id
+	u.Username = username
+	u.Phone = username
+	u.Password = password
+	u.Token = token
+	u.Root = 1
+	u.Created = time.Now()
+	u.Updated = time.Now()
+
+	err := u.AddUser()
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "register success", u)
+}
+
+// @name 修改密码
+func EditPassword(w http.ResponseWriter, r *http.Request) {
+	uid := r.FormValue("uid")
+
+	if uid == "" {
+		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+
+		return
+	}
+
+	if !IsObjectId(uid) {
+		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	oldpassword := r.FormValue("oldpassword")
+
+	if oldpassword == "" {
+		Errors(w, ErrMissParam("oldpassword", ErrCode_UserMissParamOldPassword))
+
+		return
+	}
+
+	password := r.FormValue("password")
+
+	if password == "" {
+		Errors(w, ErrMissParam("password", ErrCode_UserMissParamPassword))
+
+		return
+	}
+
+	u := new(dal.User)
+	u.Id = ObjectIdHex(uid)
+
+	err := u.FindByID()
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	if u.Password != utils.Md5(utils.Md5(oldpassword)) {
+		Errors(w, ErrForbidden("old password error", ErrCode_OldPwdErr))
+		return
+	}
+
+	u.Password = utils.Md5(utils.Md5(password))
+
+	err = u.UpdateById(uid)
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "update password success", "ok")
+
+}
+
+// @name 修改用户信息
+func EditUser(w http.ResponseWriter, r *http.Request) {
+	uid := r.FormValue("uid")
+
+	if uid == "" {
+		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+
+		return
+	}
+
+	if !IsObjectId(uid) {
+		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	nickname := r.FormValue("nickname")
+
+	if nickname == "" {
+		Errors(w, ErrMissParam("nickname", ErrCode_MissParamNickname))
+
+		return
+	}
+
+	email := r.FormValue("email")
+
+	if email == "" {
+		Errors(w, ErrMissParam("email", ErrCode_MissParamEmail))
+
+		return
+	}
+
+	job := r.FormValue("job")
+
+	if job == "" {
+		Errors(w, ErrMissParam("job", ErrCode_MissParamJob))
+
+		return
+	}
+
+	about := r.FormValue("about")
+
+	if about == "" {
+		Errors(w, ErrMissParam("about", ErrCode_MissParamAbout))
+
+		return
+	}
+
+	u := new(dal.User)
+	u.Id = ObjectIdHex(uid)
+
+	err := u.FindByID()
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	u.Nickname = nickname
+	u.Email = email
+	u.Job = job
+	u.About = about
+	u.Updated = time.Now()
+
+	err = u.UpdateById(uid)
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "update user success", u)
+}
+
 
 // @name 用户登录
 // @method POST
@@ -206,6 +386,42 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	u.Password = password
 
 	err := u.Login()
+
+	if err != nil {
+		Errors(w, ErrForbidden("login failed", ErrCode_InternalServer))
+
+		return
+	}
+
+	Push(w, "login success", u)
+}
+
+// @name 管理员登录
+func RootLogin(w http.ResponseWriter, r *http.Request) {
+
+	username := r.FormValue("username")
+
+	if username == "" {
+		Errors(w, ErrMissParam("username", ErrCode_UserMissParamUsername))
+
+		return
+	}
+
+	pwd := r.FormValue("password")
+
+	if pwd == "" {
+		Errors(w, ErrMissParam("password", ErrCode_UserMissParamPassword))
+
+		return
+	}
+
+	password := utils.Md5(utils.Md5(pwd))
+
+	u := new(dal.User)
+	u.Username = username
+	u.Password = password
+
+	err := u.RootLogin()
 
 	if err != nil {
 		Errors(w, ErrForbidden("login failed", ErrCode_InternalServer))

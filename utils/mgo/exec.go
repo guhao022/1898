@@ -77,6 +77,19 @@ func (e *Exec) FindAll(v interface{}) error {
 	return q.All(v)
 }
 
+// 计数
+func (e *Exec) Count() (int, error) {
+	e.lock.Lock()
+	defer e.lock.Lock()
+
+	s, db := DB(e.Database, e.Username, e.Password)
+	defer s.Close()
+
+	c := db.C(e.Collection)
+
+	return c.Count()
+}
+
 // 修改
 func (e *Exec) Update() error {
 	e.lock.Lock()

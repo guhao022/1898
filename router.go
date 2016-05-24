@@ -13,11 +13,21 @@ func HttpRun(addr string) {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/login", dll.Login).Methods("POST", "GET")
+	// user
+	r.HandleFunc("/login", dll.Login).Methods("POST")
+	r.HandleFunc("/rootlogin", dll.RootLogin).Methods("POST")
 	r.HandleFunc("/register", dll.Register).Methods("POST")
 	r.HandleFunc("/regkey", dll.CheckRegKey).Methods("POST")
 
+	r.HandleFunc("/user/newroot", dll.CreateRoot)
+	r.HandleFunc("/user/editpwd", dll.EditPassword)
+	r.HandleFunc("/user/edit", dll.EditUser)
 	r.HandleFunc("/user/info", dll.GetUserByID)
+
+	// friends
+	r.HandleFunc("/friend/add", dll.AddFriend)
+	r.HandleFunc("/friend/list", dll.FriendsList)
+	r.HandleFunc("/friend/del", dll.DelFriend)
 
 	// key
 	r.HandleFunc("/key/getkey", dll.GetKey).Methods("POST", "GET")
@@ -30,6 +40,12 @@ func HttpRun(addr string) {
 	r.HandleFunc("/event/list", dll.EventList).Methods("POST")
 	r.HandleFunc("/event/del", dll.DelEvent).Methods("POST")
 	r.HandleFunc("/event/cancel", dll.CancelEvent).Methods("POST")
+
+	// news
+	r.HandleFunc("/news/add", dll.AddNews)
+	r.HandleFunc("/news/edit", dll.EditNews)
+	r.HandleFunc("/news/list", dll.NewsList)
+	r.HandleFunc("/news/del", dll.DelNews)
 
 	n := negroni.New()
 	n.Use(logg.New())

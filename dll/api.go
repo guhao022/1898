@@ -9,8 +9,11 @@ const (
 	ErrCode_InternalServer = 500
 
 	ErrCode_MissParamToken = iota + 40010
+	ErrCode_TimeOver
 	ErrCode_TokenExpired
 	ErrCode_MissParamUid
+	ErrCode_UserMissParamUsername
+	ErrCode_MissParamId
 	ErrCode_UidNotObjectId
 	//
 	ErrCode_UserMissParamKey
@@ -19,6 +22,12 @@ const (
 	ErrCode_UserMissParamPhone
 	ErrCode_UserPhoneNotMatch
 	ErrCode_UserMissParamPassword
+	ErrCode_UserMissParamOldPassword
+	ErrCode_OldPwdErr
+	ErrCode_MissParamNickname
+	ErrCode_MissParamEmail
+	ErrCode_MissParamJob
+	ErrCode_MissParamAbout
 	ErrCode_UpdateKeyErr
 	ErrCode_NickNameErr
 	//
@@ -41,6 +50,15 @@ const (
 	ErrCode_AddFriendErr
 	ErrCode_MissParamFid
 	ErrCode_FriendRepeat
+	//
+	ErrCode_MissParamNewTitle
+	ErrCode_StringLenErr
+	ErrCode_MissParamContent
+	ErrCode_NewNotFound
+	//
+	ErrCode_MissParamToId
+	ErrCode_NotFriend
+	ErrCode_MissParamMsg
 
 )
 

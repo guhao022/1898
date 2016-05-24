@@ -8,6 +8,7 @@ import (
 // 用户
 type User struct {
 	Id       bson.ObjectId `bson:"_id,omitempty" json:"id"`
+	Username string        `bson:"username" json:"username"`
 	Phone    string        `bson:"phone" json:"phone"`
 	Password string        `bson:"password" json:"password"`
 	Salt     string        `bson:"salt" json:"salt"`
@@ -16,6 +17,7 @@ type User struct {
 	Job      string        `bson:"job" json:"job"`
 	About    string        `bson:"about" json:"about"`
 	Token 	 *Token        `bson:"token" json:"token"`
+	Root	 byte          `bson:"root" json:"root"`
 	Created  time.Time     `bson:"created" json:"created"`
 	Updated  time.Time     `bson:"updated" json:"updated"`
 	Deleted  time.Time     `bson:"deleted" json:"deleted"`
@@ -38,6 +40,17 @@ type Friends struct {
 	Deleted  time.Time     `bson:"deleted" json:"deleted"`
 }
 
+// 消息
+type Message struct {
+	Id    	bson.ObjectId `bson:"_id,omitempty" json:"id"`
+	SendUId bson.ObjectId `bson:"sendid" json:"sendid"`
+	GetUId  bson.ObjectId `bson:"getid" json:"getid"`
+	Msg		string        `bson:"msg" json:"msg"`
+	Read	byte          `bson:"read" json:"read"`
+	Created time.Time     `bson:"created" json:"created"`
+	Deleted time.Time     `bson:"deleted" json:"deleted"`
+}
+
 
 // 注册码
 type Keys struct {
@@ -54,7 +67,7 @@ type News struct {
 	Id      bson.ObjectId `bson:"_id,omitempty" json:"id"`
 	CreateUser	*User `bson:"create_user" json:"create_user"`
 	Title   string        `bson:"title" json:"title"`
-	Detail  string        `bson:"detail" json:"detail"`
+	Content  string        `bson:"content" json:"content"`
 	Created time.Time     `bson:"created" json:"created"`
 	Updated time.Time     `bson:"updated" json:"updated"`
 	Deleted time.Time     `bson:"deleted" json:"deleted"`
@@ -70,7 +83,7 @@ type Event struct {
 	Price   int             `bson:"price" json:"price"`     // 活动价格
 	Total   int             `bson:"total" json:"total"`     // 允许总参加人数
 	SignUp map[string]string `bson:"signup" json:"signup"` // 已报名的用户
-	Start 	string       	`bson:"start" json:"start"`	//开始时间
+	Start 	int64       	`bson:"start" json:"start"`	//开始时间
 	Created time.Time       `bson:"created" json:"created"`
 	Updated time.Time       `bson:"updated" json:"updated"`
 	Deleted time.Time       `bson:"deleted" json:"deleted"`
