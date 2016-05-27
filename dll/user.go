@@ -315,6 +315,46 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	company := r.FormValue("company")
+
+	if company == "" {
+		Errors(w, ErrMissParam("company", ErrCode_MissParamCompany))
+
+		return
+	}
+
+	pro := r.FormValue("pro")
+
+	if pro == "" {
+		Errors(w, ErrMissParam("pro", ErrCode_MissParamPro))
+
+		return
+	}
+
+	city := r.FormValue("city")
+
+	if city == "" {
+		Errors(w, ErrMissParam("city", ErrCode_MissParamCity))
+
+		return
+	}
+
+	expert := r.FormValue("expert")
+
+	if expert == "" {
+		Errors(w, ErrMissParam("expert", ErrCode_MissParamExpert))
+
+		return
+	}
+
+	hobby := r.FormValue("hobby")
+
+	if hobby == "" {
+		Errors(w, ErrMissParam("hobby", ErrCode_MissParamHobby))
+
+		return
+	}
+
 	u := new(dal.User)
 	u.Id = ObjectIdHex(uid)
 
@@ -329,6 +369,11 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 	u.Email = email
 	u.Job = job
 	u.About = about
+	u.Company = company
+	u.Expert = expert
+	u.Hobby = hobby
+	u.Profession = pro
+	u.City = city
 	u.Updated = time.Now()
 
 	err = u.UpdateById(uid)

@@ -36,8 +36,8 @@ func PushMsg(w http.ResponseWriter, r *http.Request) {
 
 	// 检测是否是朋友关系
 	f := new(dal.Friends)
-	f.UId = uid
-	f.Fid = toid
+	f.UId = ObjectIdHex(uid)
+	f.Fid = ObjectIdHex(toid)
 	err := f.FindByUFID()
 
 	if err != nil || f.Agree.IsZero() {
@@ -59,8 +59,8 @@ func PushMsg(w http.ResponseWriter, r *http.Request) {
 
 	m := new(dal.Message)
 
-	m.SendUId = uid
-	m.GetUId = toid
+	m.SendUId = ObjectIdHex(uid)
+	m.GetUId = ObjectIdHex(toid)
 	m.Msg = msg
 	m.Read = 0
 	m.Created = time.Now()
@@ -98,4 +98,38 @@ func PullMsg(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Push(w, "get news success", ms)
+}
+
+//@name 阅读消息
+func ReadMsg(w http.ResponseWriter, r *http.Request) {
+	id := r.FormValue("id")
+
+	if id == "" {
+		Errors(w, ErrMissParam("id", ErrCode_MissParamUid))
+
+		return
+	}
+
+	if !IsObjectId(id) {
+		Errors(w, ErrForbidden("id must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	m := new(dal.Message)
+
+	err := m.FindById(id)
+	if err != nil {
+		Errors(w, ErrInternalServer("message not found", ErrCode_InternalServer))
+		return
+	}
+
+	m.Read = 1
+	err = m.UpdateById(id)
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "read message", "ok")
+
 }

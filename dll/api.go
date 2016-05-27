@@ -28,6 +28,11 @@ const (
 	ErrCode_MissParamEmail
 	ErrCode_MissParamJob
 	ErrCode_MissParamAbout
+	ErrCode_MissParamCompany
+	ErrCode_MissParamPro
+	ErrCode_MissParamCity
+	ErrCode_MissParamExpert
+	ErrCode_MissParamHobby
 	ErrCode_UpdateKeyErr
 	ErrCode_NickNameErr
 	//

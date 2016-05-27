@@ -29,8 +29,13 @@ func HttpRun(addr string) {
 	r.HandleFunc("/friend/list", dll.FriendsList)
 	r.HandleFunc("/friend/del", dll.DelFriend)
 
+	//message
+	r.HandleFunc("/msg/push", dll.PushMsg)
+	r.HandleFunc("/msg/pull", dll.PullMsg)
+	r.HandleFunc("/msg/read", dll.ReadMsg)
+
 	// key
-	r.HandleFunc("/key/getkey", dll.GetKey).Methods("POST", "GET")
+	r.HandleFunc("/key/getkey", dll.GetKey).Methods("POST")
 
 	// event
 	r.HandleFunc("/event/new", dll.NewEvent).Methods("POST")

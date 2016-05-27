@@ -8,6 +8,7 @@ import (
 // 用户
 type User struct {
 	Id       bson.ObjectId `bson:"_id,omitempty" json:"id"`
+	Avatar	 string        `bson:"avatar" json:"avatar"`
 	Username string        `bson:"username" json:"username"`
 	Phone    string        `bson:"phone" json:"phone"`
 	Password string        `bson:"password" json:"password"`
@@ -16,6 +17,11 @@ type User struct {
 	Email    string        `bson:"email" json:"email"`
 	Job      string        `bson:"job" json:"job"`
 	About    string        `bson:"about" json:"about"`
+	Company  string        `bson:"company" json:"company"`
+	Profession 	 string    `bson:"pro" json:"pro"`
+	City	string         `bson:"city" json:"city"`
+	Expert	string         `bson:"expert" json:"expert"`
+	Hobby	string         `bson:"hobby" json:"hobby"`
 	Token 	 *Token        `bson:"token" json:"token"`
 	Root	 byte          `bson:"root" json:"root"`
 	Created  time.Time     `bson:"created" json:"created"`
@@ -68,6 +74,7 @@ type News struct {
 	CreateUser	*User `bson:"create_user" json:"create_user"`
 	Title   string        `bson:"title" json:"title"`
 	Content  string        `bson:"content" json:"content"`
+	Image   string        `bson:"image" json:"image"`
 	Created time.Time     `bson:"created" json:"created"`
 	Updated time.Time     `bson:"updated" json:"updated"`
 	Deleted time.Time     `bson:"deleted" json:"deleted"`

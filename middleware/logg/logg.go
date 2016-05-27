@@ -23,7 +23,7 @@ func (l *Log) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.Handle
 
 	next(w, r)
 
-	CLog("[SUCC] ========@@ $ @@[ %s ]@@ $ @@========", l.Ip)
+	CLog("[SUCC] ========@@ $ @@[ %s ]@@ $ @@========", RemoteIP(r))
 	CLog("[TRAC] @@ 方法 @@: # %s #", r.Method)
 	CLog("[TRAC] @@ 地址 @@: # %s #", r.RequestURI)
 	CLog("[TRAC] @@ 参数 @@: # %s #", r.Form.Encode())

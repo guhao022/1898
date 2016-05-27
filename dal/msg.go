@@ -24,18 +24,28 @@ func (m *Message) FindById(id string) error {
 func (m *Message) FindSendByUid(uid string) ([]*Message,error) {
 	var ms []*Message
 	c := m.mgo()
-	c.Query = bson.M{"sendid", bson.ObjectIdHex(uid)}
+	c.Query = bson.M{"sendid": bson.ObjectIdHex(uid)}
 
 	err := c.Find(&ms)
 
 	return ms, err
 }
 
+// 修改
+func (m *Message) UpdateById(id string) error {
+	c := m.mgo()
+	c.Query = bson.M{"_id": bson.ObjectIdHex(id)}
+
+	c.Change = bson.M{"$set": m}
+
+	return c.Update()
+}
+
 // 根据用户id获取用户所有收到的信息
 func (m *Message) FindGetByUid(uid string) ([]*Message,error) {
 	var ms []*Message
 	c := m.mgo()
-	c.Query = bson.M{"getid", bson.ObjectIdHex(uid)}
+	c.Query = bson.M{"getid": bson.ObjectIdHex(uid)}
 
 	err := c.Find(&ms)
 
