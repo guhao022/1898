@@ -14,7 +14,7 @@ func (n *News) AddNews() error {
 }
 
 // 新闻列表
-func (n *News) FindAll(skip, limit int, sort ...string) (v []*Event, err error) {
+func (n *News) FindAll(skip, limit int, sort ...string) (v []*News, err error) {
 	c := n.mgo()
 	if len(sort) > 0 {
 		c.Sort = sort
@@ -56,7 +56,10 @@ func (n *News) DeleteNewById(id string) error {
 }
 
 // 新闻总数
-func (n *News) Count() (int, error) {
+func (n *News) Count() int {
 	c := n.mgo()
-	return c.Count()
+
+	c.Counting()
+
+	return c.Count
 }

@@ -14,8 +14,9 @@ func (e *Event) mgo() *Mgo {
 // skip 跳过前n个文档
 // limit 返回文档个数
 // sort 用法如("firstname", "-lastname")，优先按firstname正序排列，其次按lastname倒序排列
-func (e *Event) FindAll(skip, limit int, sort ...string) (v []*Event, err error) {
+func (e *Event) FindAll(skip, limit int, query map[string]interface{}, sort ...string) (v []*Event, err error) {
 	c := e.mgo()
+	c.Query = query
 	if len(sort) > 0 {
 		c.Sort = sort
 	}
@@ -37,7 +38,7 @@ func (e *Event) FindByID() error {
 	return c.Find(&e)
 }
 
-// 根据用户名查询用户
+// 根据标题查询
 func (e *Event) FindByTitle() error {
 	c := e.mgo()
 	c.Query = bson.M{"title": e.Title}

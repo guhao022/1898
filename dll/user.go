@@ -7,6 +7,7 @@ import (
 
 	"1898/dal"
 	"1898/utils"
+	"strconv"
 )
 
 //@name 检测邀请码
@@ -258,7 +259,7 @@ func EditPassword(w http.ResponseWriter, r *http.Request) {
 
 	u.Password = utils.Md5(utils.Md5(password))
 
-	err = u.UpdateById(uid)
+	err = u.UpdateById()
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
@@ -283,6 +284,16 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	u := new(dal.User)
+	u.Id = ObjectIdHex(uid)
+
+	err := u.FindByID()
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
 	nickname := r.FormValue("nickname")
 
 	if nickname == "" {
@@ -294,75 +305,67 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 
 	if email == "" {
-		Errors(w, ErrMissParam("email", ErrCode_MissParamEmail))
-
-		return
+		email = u.Email
 	}
 
 	job := r.FormValue("job")
 
 	if job == "" {
-		Errors(w, ErrMissParam("job", ErrCode_MissParamJob))
-
-		return
+		job = u.Job
 	}
 
 	about := r.FormValue("about")
 
 	if about == "" {
-		Errors(w, ErrMissParam("about", ErrCode_MissParamAbout))
-
-		return
+		about = u.About
 	}
 
 	company := r.FormValue("company")
 
 	if company == "" {
-		Errors(w, ErrMissParam("company", ErrCode_MissParamCompany))
-
-		return
+		company = u.Company
 	}
 
 	pro := r.FormValue("pro")
 
 	if pro == "" {
-		Errors(w, ErrMissParam("pro", ErrCode_MissParamPro))
-
-		return
+		pro = u.Profession
 	}
 
 	city := r.FormValue("city")
 
 	if city == "" {
-		Errors(w, ErrMissParam("city", ErrCode_MissParamCity))
-
-		return
+		city = u.City
 	}
 
 	expert := r.FormValue("expert")
 
 	if expert == "" {
-		Errors(w, ErrMissParam("expert", ErrCode_MissParamExpert))
-
-		return
+		expert = u.Expert
 	}
 
 	hobby := r.FormValue("hobby")
 
 	if hobby == "" {
-		Errors(w, ErrMissParam("hobby", ErrCode_MissParamHobby))
-
-		return
+		hobby = u.Hobby
 	}
 
-	u := new(dal.User)
-	u.Id = ObjectIdHex(uid)
+	honor := r.FormValue("honor")
 
-	err := u.FindByID()
+	if honor == "" {
+		honor = u.Honor
+	}
+
+	age, err :=  strconv.Atoi(r.FormValue("age"))
 
 	if err != nil {
-		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
-		return
+		age = u.Age
+	}
+	sex, err :=  strconv.Atoi(r.FormValue("sex"))
+
+	if err != nil {
+
+		sex = u.Sex
 	}
 
 	u.Nickname = nickname
@@ -374,9 +377,12 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 	u.Hobby = hobby
 	u.Profession = pro
 	u.City = city
+	u.Honor = honor
+	u.Age = age
+	u.Sex = sex
 	u.Updated = time.Now()
 
-	err = u.UpdateById(uid)
+	err = u.UpdateById()
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
@@ -505,5 +511,73 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 	Push(w, "find user success", u)
 
 }
+
+// 根据用户id获取用户信息
+func GetUserByPhone(w http.ResponseWriter, r *http.Request) {
+	phone := r.FormValue("phone")
+
+	if phone == "" {
+		Errors(w, ErrMissParam("phone", ErrCode_UserMissParamPhone))
+
+		return
+	}
+
+
+	u := new(dal.User)
+	u.Phone = phone
+
+	err := u.FindByPhone()
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "find user success", u)
+
+}
+
+// 头像上传
+func Avatar(w http.ResponseWriter, r *http.Request) {
+	uid := r.FormValue("uid")
+
+	if uid == "" {
+		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+
+		return
+	}
+
+	if !IsObjectId(uid) {
+		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	fp, err := utils.Upload(r)
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_UploadErr))
+		return
+	}
+
+	user := new(dal.User)
+
+	user.Id = ObjectIdHex(uid)
+	err = user.FindByID()
+
+	if err != nil {
+		Errors(w, ErrInternalServer("not found user", ErrCode_UserNotFound))
+		return
+	}
+
+	user.Avatar = fp
+
+	err = user.UpdateById()
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+	Push(w, "upload success", fp)
+}
+
 
 

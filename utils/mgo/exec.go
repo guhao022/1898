@@ -17,9 +17,27 @@ type Exec struct {
 
 	Change     map[string]interface{} 	// 文档更新内容
 
+	Count 		int						// 总数据
+
 	lock  		sync.RWMutex
 }
 
+// 计数
+func (e *Exec) Counting(){
+	e.lock.Lock()
+	defer e.lock.Unlock()
+	s, db := DB(e.Database, e.Username, e.Password)
+	defer s.Close()
+
+	c := db.C(e.Collection)
+	i, err := c.Count()
+
+	if err != nil {
+		e.Count = 0
+	}
+
+	e.Count = i
+}
 
 // 写入
 func (e *Exec) Insert(docs ...interface{}) error {
@@ -75,19 +93,6 @@ func (e *Exec) FindAll(v interface{}) error {
 	}
 
 	return q.All(v)
-}
-
-// 计数
-func (e *Exec) Count() (int, error) {
-	e.lock.Lock()
-	defer e.lock.Lock()
-
-	s, db := DB(e.Database, e.Username, e.Password)
-	defer s.Close()
-
-	c := db.C(e.Collection)
-
-	return c.Count()
 }
 
 // 修改

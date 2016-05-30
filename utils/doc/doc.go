@@ -1,6 +1,12 @@
 package doc
 
-// 定义需要生成文档的func
+// 文档结构
 type DocBox struct {
 
 }
+
+// 获取注释
+func Comment()
+
+
+

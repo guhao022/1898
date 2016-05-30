@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"1898/dal"
 	"time"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // @name 创建活动
@@ -105,7 +106,8 @@ func NewEvent (w http.ResponseWriter, r *http.Request) {
 
 	var event = &dal.Event{}
 
-	event.CreateUser = u
+	event.Uid = u.Id
+	event.Username = u.Username
 	event.Title = title
 	event.Detail = detail
 	event.Addr = addr
@@ -212,7 +214,7 @@ func EditEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 检测是否是创建人
-	if uid != event.CreateUser.Id.Hex() {
+	if uid != event.Uid.Hex() {
 		Errors(w, ErrForbidden("not create user", ErrCode_EventNotCreateUser))
 
 		return
@@ -325,7 +327,7 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 检查是否为组织者
-	if ObjectIdHex(uid) == event.CreateUser.Id {
+	if ObjectIdHex(uid) == event.Uid {
 		Errors(w, ErrInternalServer("the event organizer", ErrCode_EventOrganizer))
 		return
 	}
@@ -362,7 +364,9 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 func EventList(w http.ResponseWriter, r *http.Request) {
 	var event dal.Event
 
-	v, err := event.FindAll(0, 0, "created")
+	query := bson.M{}
+
+	v, err := event.FindAll(0, 0, query, "created")
 
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
@@ -452,6 +456,74 @@ func CancelEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Push(w, "event cancel success", "ok")
+}
+
+// 我发表的活动
+func MyPublishEvent(w http.ResponseWriter, r *http.Request) {
+	uid := r.FormValue("uid")
+
+	if uid == "" {
+		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+
+		return
+	}
+
+	if !IsObjectId(uid) {
+		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	var event *dal.Event
+
+	query := bson.M{"uid": ObjectIdHex(uid)}
+
+	v, err := event.FindAll(0, 0, query, "created")
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "event list", v)
+}
+
+// 我参加的活动
+func MyJoinEvent(w http.ResponseWriter, r *http.Request) {
+
+	uid := r.FormValue("uid")
+
+	if uid == "" {
+		Errors(w, ErrMissParam("uid", ErrCode_MissParamUid))
+
+		return
+	}
+
+	if !IsObjectId(uid) {
+		Errors(w, ErrForbidden("uid must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	var event *dal.Event
+
+	query := bson.M{}
+
+	v, err := event.FindAll(0, 0, query, "created")
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	var es = make([]*dal.Event, 0)
+
+	for _, e := range v {
+		if _, ok := e.SignUp[uid]; ok {
+			es = append(es, e)
+		}
+	}
+
+	Push(w, "event list", es)
+
 }
 
 

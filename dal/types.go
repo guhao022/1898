@@ -14,6 +14,8 @@ type User struct {
 	Password string        `bson:"password" json:"password"`
 	Salt     string        `bson:"salt" json:"salt"`
 	Nickname string        `bson:"nickname" json:"nickname"`
+	Age 	 int           `bson:"age" json:"age"`
+	Sex 	 int          `bson:"sex" json:"sex"`
 	Email    string        `bson:"email" json:"email"`
 	Job      string        `bson:"job" json:"job"`
 	About    string        `bson:"about" json:"about"`
@@ -22,6 +24,7 @@ type User struct {
 	City	string         `bson:"city" json:"city"`
 	Expert	string         `bson:"expert" json:"expert"`
 	Hobby	string         `bson:"hobby" json:"hobby"`
+	Honor	string         `bson:"honor" json:"honor"`
 	Token 	 *Token        `bson:"token" json:"token"`
 	Root	 byte          `bson:"root" json:"root"`
 	Created  time.Time     `bson:"created" json:"created"`
@@ -71,7 +74,8 @@ type Keys struct {
 // 新闻
 type News struct {
 	Id      bson.ObjectId `bson:"_id,omitempty" json:"id"`
-	CreateUser	*User `bson:"create_user" json:"create_user"`
+	Uid		bson.ObjectId `bson:"uid" json:"uid"`
+	Username string    `bson:"username" json:"username"`
 	Title   string        `bson:"title" json:"title"`
 	Content  string        `bson:"content" json:"content"`
 	Image   string        `bson:"image" json:"image"`
@@ -83,7 +87,8 @@ type News struct {
 // 活动
 type Event struct {
 	Id      bson.ObjectId   `bson:"_id,omitempty" json:"id"`
-	CreateUser    *User   `bson:"create_user" json:"create_user"`
+	Uid		bson.ObjectId `bson:"uid" json:"uid"`
+	Username string    `bson:"username" json:"username"`
 	Title   string          `bson:"title" json:"title"`   // 活动标题
 	Detail  string          `bson:"detail" json:"detail"` // 活动详情
 	Addr    string          `bson:"addr" json:"addr"`     // 活动地址

@@ -86,9 +86,9 @@ func (u *User) UpdateByName(username string) error {
 }
 
 // 根据ID更改用户信息
-func (u *User) UpdateById(id string) error {
+func (u *User) UpdateById() error {
 	c := u.mgo()
-	c.Query = bson.M{"_id": bson.IsObjectIdHex(id)}
+	c.Query = bson.M{"_id": u.Id}
 	c.Change = bson.M{"$set": u}
 
 	return c.Update()

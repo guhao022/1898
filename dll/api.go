@@ -15,6 +15,8 @@ const (
 	ErrCode_UserMissParamUsername
 	ErrCode_MissParamId
 	ErrCode_UidNotObjectId
+	ErrCode_UserNotFound
+	ErrCode_UploadErr
 	//
 	ErrCode_UserMissParamKey
 	ErrCode_UserKeyNotFound
@@ -33,6 +35,9 @@ const (
 	ErrCode_MissParamCity
 	ErrCode_MissParamExpert
 	ErrCode_MissParamHobby
+	ErrCode_MissParamHonor
+	ErrCode_MissParamAge
+	ErrCode_MissParamSex
 	ErrCode_UpdateKeyErr
 	ErrCode_NickNameErr
 	//
@@ -59,7 +64,8 @@ const (
 	ErrCode_MissParamNewTitle
 	ErrCode_StringLenErr
 	ErrCode_MissParamContent
-	ErrCode_NewNotFound
+	ErrCode_NewsNotFound
+	ErrCode_MissParamImagePath
 	//
 	ErrCode_MissParamToId
 	ErrCode_NotFriend

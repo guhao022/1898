@@ -15,7 +15,7 @@ type Paging struct {
 var DefaultLimt = 10
 
 func NewPaging(count, limit int) *Paging {
-	return &Paging{Count:count}
+	return &Paging{Count:count, Limit:limit}
 }
 
 func (p *Paging) SetPage(page int) *Paging {

@@ -18,11 +18,14 @@ func (f *Friends) Add() error {
 // 获取好友列表
 func (f *Friends) FindByUid(uid string) ([]*Friends, error) {
 	c := f.mgo()
-	c.Query = bson.M{"uid": uid, "agree":bson.M{"$gt": new(time.Time)}, "deleted": new(time.Time)}
+
+	c.Query = bson.M{"uid": bson.ObjectIdHex(uid), "agree":bson.M{"$gt": new(time.Time)}, "deleted": new(time.Time)}
 
 	var fs []*Friends
 
-	err := c.Find(&fs)
+	err := c.FindAll(&fs)
+
+	//println(err.Error())
 
 	return fs, err
 }
@@ -54,20 +57,20 @@ func (f *Friends) UpdateById(id string) error {
 }
 
 // 软删除
-func (f *Friends) DelByid(id string) error {
-	err := f.FindByID()
+func (f *Friends) DelByUFid() error {
+	err := f.FindByUFID()
 	if err != nil {
 		return err
 	}
 	f.Deleted = time.Now()
 
-	return f.UpdateById(id)
+	return f.UpdateById(f.Id.Hex())
 }
 
 // 删除
-func (f *Friends) DeleteById(id string) error {
+func (f *Friends) DeleteById() error {
 	c := f.mgo()
-	c.Query = bson.M{"_id": bson.ObjectIdHex(id)}
+	c.Query = bson.M{"_id": f.Id}
 
 	return c.Remove()
 }

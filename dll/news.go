@@ -23,15 +23,22 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	title := r.FormValue("Title")
+	title := r.FormValue("title")
 
 	if title == "" {
 		Errors(w, ErrMissParam("title", ErrCode_MissParamNewTitle))
 
 		return
 	}
-	if len(title) > 30 {
+	if len(title) > 60 {
 		Errors(w, ErrForbidden("title must be at least 30 characters", ErrCode_StringLenErr))
+		return
+	}
+
+	filepath := r.FormValue("image")
+	if filepath == "" {
+		Errors(w, ErrMissParam("filepath", ErrCode_MissParamImagePath))
+
 		return
 	}
 
@@ -43,6 +50,7 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u := new(dal.User)
+	u.Id = ObjectIdHex(uid)
 	err := u.FindByID()
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
@@ -51,7 +59,9 @@ func AddNews(w http.ResponseWriter, r *http.Request) {
 
 	n := new(dal.News)
 	n.Title = title
-	n.CreateUser = u
+	n.Uid = u.Id
+	n.Username = u.Nickname
+	n.Image = filepath
 	n.Content = content
 	n.Created = time.Now()
 	n.Updated = time.Now()
@@ -80,14 +90,14 @@ func EditNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	title := r.FormValue("Title")
+	title := r.FormValue("title")
 
 	if title == "" {
 		Errors(w, ErrMissParam("title", ErrCode_MissParamNewTitle))
 
 		return
 	}
-	if len(title) > 30 {
+	if len(title) > 60 {
 		Errors(w, ErrForbidden("title must be at least 30 characters", ErrCode_StringLenErr))
 		return
 	}
@@ -99,15 +109,24 @@ func EditNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filepath := r.FormValue("image")
+	if filepath == "" {
+		Errors(w, ErrMissParam("filepath", ErrCode_MissParamImagePath))
+
+		return
+	}
+
 	n := new(dal.News)
+	n.Id = ObjectIdHex(id)
 	err := n.FindById()
 	if err != nil {
-		Errors(w, ErrInternalServer("news not found", ErrCode_NewNotFound))
+		Errors(w, ErrInternalServer("news not found", ErrCode_NewsNotFound))
 		return
 	}
 
 	n.Title = title
 	n.Content = content
+	n.Image = filepath
 	n.Updated = time.Now()
 
 	err = n.UpdateNewById()
@@ -148,16 +167,49 @@ func DelNews(w http.ResponseWriter, r *http.Request) {
 func NewsList(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.Atoi(r.FormValue("page"))
 	if err != nil {
-		page = 0
+		page = 1
 	}
 
 	n := new(dal.News)
-	count, err := n.Count()
+	count := n.Count()
 
-	p := utils.NewPaging(count, 10).SetPage(page).Calc()
+	p := utils.NewPaging(count, 3).SetPage(page).Calc()
 
-	n.FindAll(p.Offset, p.Limit, "updated")
+	news, err := n.FindAll(p.Offset, p.Limit, "updated")
 
-	Push(w, "get news list success", n)
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, strconv.Itoa(p.TotalPages) , news)
+}
+
+//@name 新闻信息
+func FindNews(w http.ResponseWriter, r *http.Request) {
+	id := r.FormValue("id")
+
+	if id == "" {
+		Errors(w, ErrMissParam("id", ErrCode_MissParamId))
+
+		return
+	}
+
+	if !IsObjectId(id) {
+		Errors(w, ErrForbidden("id must be ObjectId format", ErrCode_UidNotObjectId))
+		return
+	}
+
+	n := new(dal.News)
+	n.Id = ObjectIdHex(id)
+
+	err := n.FindById()
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "get news success", n)
 }
 
