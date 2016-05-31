@@ -2,9 +2,9 @@ package dal
 
 import (
 	"1898/utils"
-	"time"
-	"gopkg.in/mgo.v2/bson"
 	"errors"
+	"gopkg.in/mgo.v2/bson"
+	"time"
 )
 
 // 新建token
@@ -15,7 +15,7 @@ func (t *User) NewToken() *Token {
 
 	ut.Token = token
 	ut.Created = time.Now()
-	ut.Expired = time.Now().Add(2*time.Hour)
+	ut.Expired = time.Now().Add(2 * time.Hour)
 
 	return ut
 }
@@ -75,4 +75,3 @@ func (t *User) TokenExpire(uid, tokenval string) bool {
 
 	return false
 }
-

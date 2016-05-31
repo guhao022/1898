@@ -1,8 +1,8 @@
 package dll
 
 import (
-	"net/http"
 	"1898/dal"
+	"net/http"
 	"time"
 )
 
@@ -57,8 +57,26 @@ func AddFriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	err = f.Add()
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	fu := new(dal.Friends)
+	fu.UId = u.Id
+	fu.Fid = ObjectIdHex(uid)
+	fu.Created = time.Now()
+
+	// 检查好友是否重复
+	err = fu.FindByUFID()
+	if err == nil {
+		Errors(w, ErrForbidden("repeat", ErrCode_FriendRepeat))
+		return
+	}
+
+	err = fu.Add()
 
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
@@ -70,9 +88,9 @@ func AddFriend(w http.ResponseWriter, r *http.Request) {
 }
 
 // 同意加为好友
-func FriendAgree(w http.ResponseWriter, r *http.Request) {
+/*func FriendAgree(w http.ResponseWriter, r *http.Request) {
 
-}
+}*/
 
 // 好友列表
 func FriendsList(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +115,6 @@ func FriendsList(w http.ResponseWriter, r *http.Request) {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
-
 
 	Push(w, "get friends success", fs)
 
@@ -166,4 +183,3 @@ func DelFriend(w http.ResponseWriter, r *http.Request) {
 	Push(w, "soft delete success", "ok")
 
 }
-

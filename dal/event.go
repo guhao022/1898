@@ -1,8 +1,8 @@
 package dal
 
 import (
-	"gopkg.in/mgo.v2/bson"
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
 	"time"
 )
 
@@ -87,6 +87,3 @@ func (e *Event) DelById(id string) error {
 
 	return e.UpdateById(id)
 }
-
-
-

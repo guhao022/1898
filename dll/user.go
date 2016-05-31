@@ -2,13 +2,15 @@ package dll
 
 import (
 	"net/http"
-	"time"
 	"strings"
+	"time"
 
 	"1898/dal"
 	"1898/utils"
 	"strconv"
-)
+	/*"github.com/num5/alidayu"
+	"os"
+	"fmt"*/)
 
 //@name 检测邀请码
 func CheckRegKey(w http.ResponseWriter, r *http.Request) {
@@ -184,8 +186,6 @@ func CreateRoot(w http.ResponseWriter, r *http.Request) {
 
 	password := utils.Md5(utils.Md5(pwd))
 
-
-
 	id := NewObjectId()
 
 	u := new(dal.User)
@@ -356,12 +356,12 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		honor = u.Honor
 	}
 
-	age, err :=  strconv.Atoi(r.FormValue("age"))
+	age, err := strconv.Atoi(r.FormValue("age"))
 
 	if err != nil {
 		age = u.Age
 	}
-	sex, err :=  strconv.Atoi(r.FormValue("sex"))
+	sex, err := strconv.Atoi(r.FormValue("sex"))
 
 	if err != nil {
 
@@ -390,7 +390,6 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 
 	Push(w, "update user success", u)
 }
-
 
 // @name 用户登录
 // @method POST
@@ -522,7 +521,6 @@ func GetUserByPhone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	u := new(dal.User)
 	u.Phone = phone
 
@@ -579,5 +577,29 @@ func Avatar(w http.ResponseWriter, r *http.Request) {
 	Push(w, "upload success", fp)
 }
 
+/*func SendSMS(w http.ResponseWriter, r *http.Request) {
+	types := r.FormValue("type")
+	if  types== "" {
+		Errors(w, ErrMissParam("type", ErrCode_MissParamType))
 
+		return
+	}
 
+	phone := r.FormValue("phone")
+
+	alidayu.AppKey = os.Getenv("ALI_APPKEY")
+	alidayu.AppSecret = os.Getenv("ALI_APPSECRET")
+
+	var code string
+
+	code = string(utils.RandomCreateBytes(6, []byte("1234567890")))
+
+	sms_param, _ := fmt.Printf(`{"code":%s,"product":%s}`, code, "1898")
+
+	if types == "register" {
+		success, resp := alidayu.SendSMS(phone, "用户注册", "SMS_10245224", sms_param)
+		println("Success:", success)
+		println(resp)
+	}
+
+}*/

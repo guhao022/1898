@@ -1,8 +1,8 @@
 package dll
 
 import (
-	"net/http"
 	"1898/dal"
+	"net/http"
 	"time"
 )
 
@@ -40,7 +40,7 @@ func PushMsg(w http.ResponseWriter, r *http.Request) {
 	f.Fid = ObjectIdHex(toid)
 	err := f.FindByUFID()
 
-	if err != nil || f.Agree.IsZero() {
+	if err != nil /* || f.Agree.IsZero()*/ {
 		Errors(w, ErrForbidden("not frients", ErrCode_NotFriend))
 		return
 	}
@@ -52,8 +52,8 @@ func PushMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(msg) > 140 {
-		Errors(w, ErrForbidden("title must be at least 140 characters", ErrCode_StringLenErr))
+	if len(msg) > 252 {
+		Errors(w, ErrForbidden("title must be at least 250 characters", ErrCode_StringLenErr))
 		return
 	}
 
@@ -97,7 +97,18 @@ func PullMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Push(w, "get news success", ms)
+	nms := make([]*dal.Message, 0)
+
+	for _, v := range ms {
+		u := new(dal.User)
+		u.Id = ObjectIdHex(uid)
+		u.FindByID()
+		v.Nickname = u.Nickname
+
+		nms = append(nms, v)
+	}
+
+	Push(w, "get news success", nms)
 }
 
 //@name 阅读消息

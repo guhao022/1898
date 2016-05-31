@@ -21,7 +21,7 @@ func (m *Message) FindById(id string) error {
 }
 
 // 根据用户id获取用户所有发送的消息
-func (m *Message) FindSendByUid(uid string) ([]*Message,error) {
+func (m *Message) FindSendByUid(uid string) ([]*Message, error) {
 	var ms []*Message
 	c := m.mgo()
 	c.Query = bson.M{"sendid": bson.ObjectIdHex(uid)}
@@ -42,12 +42,12 @@ func (m *Message) UpdateById(id string) error {
 }
 
 // 根据用户id获取用户所有收到的信息
-func (m *Message) FindGetByUid(uid string) ([]*Message,error) {
+func (m *Message) FindGetByUid(uid string) ([]*Message, error) {
 	var ms []*Message
 	c := m.mgo()
 	c.Query = bson.M{"getid": bson.ObjectIdHex(uid)}
 
-	err := c.Find(&ms)
+	err := c.FindAll(&ms)
 
 	return ms, err
 }

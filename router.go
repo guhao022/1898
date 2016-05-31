@@ -2,11 +2,11 @@ package main
 
 import (
 	"1898/dll"
-	"1898/utils/log"
-	"net/http"
-	"github.com/urfave/negroni"
-	"github.com/gorilla/mux"
 	"1898/middleware/logg"
+	"1898/utils/log"
+	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
+	"net/http"
 )
 
 func HttpRun(addr string) {
@@ -54,17 +54,14 @@ func HttpRun(addr string) {
 	r.HandleFunc("/news/add", dll.AddNews).Methods("POST")
 	r.HandleFunc("/news/one", dll.FindNews).Methods("POST")
 	r.HandleFunc("/news/edit", dll.EditNews).Methods("POST")
-	r.HandleFunc("/news/list", dll.NewsList).Methods("POST","GET")
+	r.HandleFunc("/news/list", dll.NewsList).Methods("POST", "GET")
 	r.HandleFunc("/news/del", dll.DelNews).Methods("POST")
 
 	// 文件服务器
 
-	/*r.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, r.URL.Path[1:])
-	})*/
+	//http.Handle("/doc/", http.StripPrefix("/doc/", http.FileServer(http.Dir("/usr/share/doc"))))
 
-	r.Handle("/image/", http.StripPrefix("/image/", http.FileServer(http.Dir("assets/upload"))))
-	//r.Handle("/assets/upload", http.FileServer(http.Dir("assets")))
+	r.Handle("/image/{name}", http.StripPrefix("/image/", http.FileServer(http.Dir("image"))))
 
 	n := negroni.New()
 	n.Use(logg.New())
@@ -72,13 +69,8 @@ func HttpRun(addr string) {
 
 	log.CLog("[TRAC] Server start listen on # %s #\n", addr)
 
-	err := http.ListenAndServe(":"+addr, n)
-
-	if err != nil {
+	if err := http.ListenAndServe(":"+addr, n); err != nil {
 		panic(err)
 	}
 
 }
-
-
-

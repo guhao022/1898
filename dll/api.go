@@ -1,8 +1,8 @@
 package dll
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 )
 
 const (
@@ -40,6 +40,7 @@ const (
 	ErrCode_MissParamSex
 	ErrCode_UpdateKeyErr
 	ErrCode_NickNameErr
+	ErrCode_MissParamType
 	//
 	ErrCode_EventMissParamTitle
 	ErrCode_EventMissParamDetail
@@ -70,7 +71,6 @@ const (
 	ErrCode_MissParamToId
 	ErrCode_NotFriend
 	ErrCode_MissParamMsg
-
 )
 
 type ERR_CODE int
@@ -82,18 +82,18 @@ const (
 )
 
 type JSON struct {
-	ID     string      `json:"id"`
-	Msg    string      `json:"msg"`
-	Data   interface{} `json:"data"`
+	ID      string      `json:"id"`
+	Msg     string      `json:"msg"`
+	Data    interface{} `json:"data"`
 	ErrCode int         `json:"errcode"`
 }
 
 func Push(w http.ResponseWriter, msg string, data interface{}) {
 	j := &JSON{
-		ID:"ok",
-		Msg:msg,
-		Data:data,
-		ErrCode:0,
+		ID:      "ok",
+		Msg:     msg,
+		Data:    data,
+		ErrCode: 0,
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -108,7 +108,7 @@ type Error struct {
 	Title  string `json:"title"`
 	Detail string `json:"detail"`
 
-	ErrCode int   `json:"errcode"`
+	ErrCode int `json:"errcode"`
 }
 
 func (err Error) Error() string {
@@ -156,4 +156,3 @@ func ErrUnauthorized(detail string, errcode int) *Error {
 		errcode,
 	}
 }
-

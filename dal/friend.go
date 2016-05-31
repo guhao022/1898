@@ -19,7 +19,7 @@ func (f *Friends) Add() error {
 func (f *Friends) FindByUid(uid string) ([]*Friends, error) {
 	c := f.mgo()
 
-	c.Query = bson.M{"uid": bson.ObjectIdHex(uid), "agree":bson.M{"$gt": new(time.Time)}, "deleted": new(time.Time)}
+	c.Query = bson.M{"uid": bson.ObjectIdHex(uid) /*"agree":bson.M{"$gt": new(time.Time)}, */, "deleted": new(time.Time)}
 
 	var fs []*Friends
 
@@ -74,4 +74,3 @@ func (f *Friends) DeleteById() error {
 
 	return c.Remove()
 }
-
