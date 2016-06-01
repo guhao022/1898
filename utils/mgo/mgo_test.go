@@ -1,13 +1,14 @@
 package mgo
+
 import (
-	"testing"
-	"gopkg.in/mgo.v2/bson"
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
+	"testing"
 )
 
 type Ts struct {
-	Id 		bson.ObjectId 	`bson:"_id,omitempty"`
-	Name 	string			`bson:"name"`
+	Id   bson.ObjectId `bson:"_id,omitempty"`
+	Name string        `bson:"name"`
 }
 
 var e = &Exec{
@@ -22,7 +23,7 @@ func Test_Mgo(t *testing.T) {
 	e.Collection = "test"
 
 	var ts Ts
-	e.Query = bson.M{"name":"test4"}
+	e.Query = bson.M{"name": "test4"}
 	err := e.Find(&ts)
 	if err != nil {
 		fmt.Println(err)

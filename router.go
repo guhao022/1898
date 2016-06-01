@@ -25,6 +25,7 @@ func HttpRun(addr string) {
 	r.HandleFunc("/user/info", dll.GetUserByID).Methods("POST")
 	r.HandleFunc("/user/byphone", dll.GetUserByPhone).Methods("POST")
 	r.HandleFunc("/user/avatar", dll.Avatar).Methods("POST")
+	r.HandleFunc("/user/sendsms", dll.SendSMS).Methods("POST", "GET")
 
 	// friends
 	r.HandleFunc("/friend/add", dll.AddFriend).Methods("POST")

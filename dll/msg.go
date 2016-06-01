@@ -101,7 +101,7 @@ func PullMsg(w http.ResponseWriter, r *http.Request) {
 
 	for _, v := range ms {
 		u := new(dal.User)
-		u.Id = ObjectIdHex(uid)
+		u.Id = v.SendUId
 		u.FindByID()
 		v.Nickname = u.Nickname
 

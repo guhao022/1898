@@ -8,9 +8,11 @@ import (
 	"1898/dal"
 	"1898/utils"
 	"strconv"
-	/*"github.com/num5/alidayu"
+	"github.com/num5/alidayu"
 	"os"
-	"fmt"*/)
+	"fmt"
+	"1898/utils/random"
+)
 
 //@name 检测邀请码
 func CheckRegKey(w http.ResponseWriter, r *http.Request) {
@@ -567,17 +569,19 @@ func Avatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Avatar = fp
+	avatar := os.Getenv("IMAGE_URL") + fp
+
+	user.Avatar = avatar
 
 	err = user.UpdateById()
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
-	Push(w, "upload success", fp)
+	Push(w, "upload success", avatar)
 }
 
-/*func SendSMS(w http.ResponseWriter, r *http.Request) {
+func SendSMS(w http.ResponseWriter, r *http.Request) {
 	types := r.FormValue("type")
 	if  types== "" {
 		Errors(w, ErrMissParam("type", ErrCode_MissParamType))
@@ -592,14 +596,35 @@ func Avatar(w http.ResponseWriter, r *http.Request) {
 
 	var code string
 
-	code = string(utils.RandomCreateBytes(6, []byte("1234567890")))
+	code = random.String(6,7,[]byte("1234567890"))
 
-	sms_param, _ := fmt.Printf(`{"code":%s,"product":%s}`, code, "1898")
+	sms_param := fmt.Sprintf(`{"code":"%s","product":"%s"}`, code, "1898")
+	//println(sms_param)
 
-	if types == "register" {
-		success, resp := alidayu.SendSMS(phone, "用户注册", "SMS_10245224", sms_param)
-		println("Success:", success)
-		println(resp)
+	var success bool
+	var resp string
+	var sms_free_sign_name string
+
+	sms_free_sign_name = "保定一八九八"
+
+	switch types {
+	case "register":
+		success, resp = alidayu.SendSMS(phone, sms_free_sign_name, "SMS_10245224", sms_param)
+	case "recover":
+		success, resp = alidayu.SendSMS(phone, sms_free_sign_name, "SMS_10295317", sms_param)
+	case "change":
+		success, resp = alidayu.SendSMS(phone, sms_free_sign_name, "SMS_10300267", sms_param)
+	default:
+		success = false
+		resp = "type error"
+
 	}
 
-}*/
+	if !success {
+		Errors(w, ErrInternalServer(resp, ErrCode_ErrSendSMS))
+		return
+	}
+
+	Push(w, "send sms success", code)
+
+}

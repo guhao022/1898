@@ -1,16 +1,16 @@
 package mgo
 
 import (
+	"fmt"
 	"github.com/num5/pool"
 	"gopkg.in/mgo.v2"
-	"fmt"
 	"os"
 )
 
 var mgoPool = pool.NewPool(new(Mgo))
 
 type Mgo struct {
-	Session	*mgo.Session
+	Session *mgo.Session
 }
 
 func (*Mgo) New() pool.Entity {
@@ -34,7 +34,7 @@ func (m *Mgo) Close() {
 	m.Session.Close()
 }
 
-func (m *Mgo) Clean(){}
+func (m *Mgo) Clean() {}
 
 func Session() *mgo.Session {
 	session, err := mgo.Dial(os.Getenv("MGO_REMOTE"))
@@ -61,6 +61,3 @@ func DB(database, username, password string) (*mgo.Session, *mgo.Database) {
 
 	return session, db
 }
-
-
-

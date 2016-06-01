@@ -1,16 +1,15 @@
 package utils
 
 import (
-
 	"testing"
 
-	"time"
 	"fmt"
+	"time"
 )
 
 func Test_RandomCreateBytes(t *testing.T) {
 	start := time.Now()
-	for i:=0;i<10000;i++ {
+	for i := 0; i < 10000; i++ {
 		RandomCreateBytes(6)
 	}
 

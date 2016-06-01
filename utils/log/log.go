@@ -1,11 +1,11 @@
 package log
 
 import (
-	"github.com/num5/log5"
+	"fmt"
 	"github.com/num5/env"
+	"github.com/num5/log5"
 	"os"
 	"strconv"
-	"fmt"
 )
 
 var l *log5.Log
@@ -45,7 +45,6 @@ func Fatal(v ...interface{}) {
 	l.Fatal(v)
 }
 
-
 func init() {
 	env.Load()
 	var err error
@@ -68,7 +67,7 @@ func init() {
 		logfile := os.Getenv("LOG_FILE_NAME")
 		logspilt := os.Getenv("LOG_FILE_SPILT")
 		logsize := os.Getenv("LOG_FILE_SIZE")
-		lfconf := fmt.Sprintf(`{"spilt":"%s","filename":"%s","maxsize":"%s"}`,logspilt, logfile, logsize)
+		lfconf := fmt.Sprintf(`{"spilt":"%s","filename":"%s","maxsize":"%s"}`, logspilt, logfile, logsize)
 		l = l.SetEngine(engine, lfconf)
 	}
 

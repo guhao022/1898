@@ -1,15 +1,15 @@
 package env
 
 import (
-	"os"
 	"bufio"
-	"strings"
 	"errors"
+	"os"
 	"strconv"
+	"strings"
 )
 
 type Env struct {
-	files []string
+	files  []string
 	values map[string]string
 }
 
@@ -19,7 +19,7 @@ func Load(files ...string) (*Env, error) {
 	}
 
 	env := &Env{
-		files: files,
+		files:  files,
 		values: make(map[string]string),
 	}
 
@@ -77,7 +77,6 @@ func (env *Env) set() {
 		}
 	}
 }
-
 
 func isIgnoredLine(line string) bool {
 	trimmedLine := strings.Trim(line, " \n\t")

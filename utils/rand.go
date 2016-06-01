@@ -34,5 +34,3 @@ func RandomCreateBytes(n int, alphabets ...byte) []byte {
 
 	return bytes
 }
-
-

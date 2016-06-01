@@ -1,8 +1,8 @@
 package pool
 
 import (
-	"sync"
 	"errors"
+	"sync"
 	//"time"
 )
 
@@ -10,7 +10,7 @@ type Pool interface {
 	Put(interface{})
 	Get() (interface{}, error)
 	Size() int64
-	Usable()  int64
+	Usable() int64
 }
 
 func NewPool(size int) (*Pool, error) {
@@ -25,10 +25,10 @@ func NewPool(size int) (*Pool, error) {
 }
 
 type pool struct {
-	size    int64          // 池的总容量。
-	used 	int64		// 池的使用量
-	job     chan interface{}
-	mu      sync.Mutex
+	size int64 // 池的总容量。
+	used int64 // 池的使用量
+	job  chan interface{}
+	mu   sync.Mutex
 }
 
 func (p *pool) Get() (interface{}, error) {
@@ -69,4 +69,3 @@ func (p *pool) Usable() int64 {
 
 	return usable
 }
-

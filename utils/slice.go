@@ -19,4 +19,3 @@ func InSliceIface(v interface{}, sl []interface{}) bool {
 	}
 	return false
 }
-

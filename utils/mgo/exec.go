@@ -1,29 +1,30 @@
 package mgo
+
 import (
 	"sync"
 )
 
 type Exec struct {
-	Database   	string                  // 数据库
-	Username	string					// 用户名
-	Password	string					// 密码
-	Collection 	string                  // 集合
+	Database   string // 数据库
+	Username   string // 用户名
+	Password   string // 密码
+	Collection string // 集合
 
-	Query      	map[string]interface{}	// 查询语句
-	Sort       	[]string               	// 排序
-	Skip       	int                    	// 跳过前n个文档
-	Limit 	   	int 					// 返回文档个数
-	Select     	interface{}            	// 返回指定字段，如{"name":1}
+	Query  map[string]interface{} // 查询语句
+	Sort   []string               // 排序
+	Skip   int                    // 跳过前n个文档
+	Limit  int                    // 返回文档个数
+	Select interface{}            // 返回指定字段，如{"name":1}
 
-	Change     map[string]interface{} 	// 文档更新内容
+	Change map[string]interface{} // 文档更新内容
 
-	Count 		int						// 总数据
+	Count int // 总数据
 
-	lock  		sync.RWMutex
+	lock sync.RWMutex
 }
 
 // 计数
-func (e *Exec) Counting(){
+func (e *Exec) Counting() {
 	e.lock.Lock()
 	defer e.lock.Unlock()
 	s, db := DB(e.Database, e.Username, e.Password)
@@ -109,7 +110,6 @@ func (e *Exec) Update() error {
 	return err
 }
 
-
 // 删除
 func (e *Exec) Remove() error {
 	e.lock.Lock()
@@ -123,4 +123,3 @@ func (e *Exec) Remove() error {
 
 	return err
 }
-

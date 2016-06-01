@@ -7,6 +7,7 @@ import (
 
 const (
 	ErrCode_InternalServer = 500
+	ErrCode_ErrSendSMS = 50
 
 	ErrCode_MissParamToken = iota + 40010
 	ErrCode_TimeOver

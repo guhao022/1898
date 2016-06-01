@@ -1,9 +1,9 @@
 package dll
 
 import (
+	"1898/dal"
 	"net/http"
 	"time"
-	"1898/dal"
 )
 
 // @name 生成注册码

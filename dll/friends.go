@@ -1,3 +1,4 @@
+// friend controller
 package dll
 
 import (
@@ -6,7 +7,19 @@ import (
 	"time"
 )
 
-// 添加好友
+// @name 添加好友
+// @method POST
+// @uri /friend/add
+// @param uid:用户id
+// @param phone:用户电话号码
+// @success errcode:0
+// @success id:ok
+// @success msg:add success
+// @success data:ok
+// @fail errcode:403
+// @fail id:miss_param
+// @fail title:Miss Param
+// @fail Detail:miss query param phone
 func AddFriend(w http.ResponseWriter, r *http.Request) {
 	uid := r.FormValue("uid")
 
@@ -83,7 +96,7 @@ func AddFriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Push(w, "register success", "ok")
+	Push(w, "add success", "ok")
 
 }
 

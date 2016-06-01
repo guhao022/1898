@@ -15,4 +15,3 @@ func IsObjectId(id string) bool {
 func ObjectIdHex(id string) bson.ObjectId {
 	return bson.ObjectIdHex(id)
 }
-

@@ -1,11 +1,11 @@
 package dll
 
 import (
+	"1898/dal"
+	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"strconv"
-	"1898/dal"
 	"time"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // @name 创建活动
@@ -24,7 +24,7 @@ import (
 // @fail id:miss_param
 // @fail title:Miss Param
 // @fail Detail:miss query param title
-func NewEvent (w http.ResponseWriter, r *http.Request) {
+func NewEvent(w http.ResponseWriter, r *http.Request) {
 
 	uid := r.FormValue("uid")
 
@@ -102,7 +102,6 @@ func NewEvent (w http.ResponseWriter, r *http.Request) {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
 	}
-
 
 	var event = &dal.Event{}
 
@@ -321,7 +320,7 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 
 	// 是否已过报名期
 	now := time.Now().Unix()
-	if now - event.Start < 2 * 60 * 60 {
+	if now-event.Start < 2*60*60 {
 		Errors(w, ErrForbidden("end of registration time", ErrCode_TimeOver))
 		return
 	}
@@ -341,13 +340,13 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	if total != 0 {
 		// 检测是否已经参加活动
-		if v, ok := event.SignUp[uid]; ok{
-			Errors(w, ErrForbidden("user " + v + "already join", ErrCode_UserAlreadySignUp))
+		if v, ok := event.SignUp[uid]; ok {
+			Errors(w, ErrForbidden("user "+v+"already join", ErrCode_UserAlreadySignUp))
 			return
 		}
 	}
 
-	event.SignUp[uid] =  u.Nickname
+	event.SignUp[uid] = u.Nickname
 
 	err = event.UpdateById(eid)
 
@@ -442,7 +441,7 @@ func CancelEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 检测是否已经参加活动
-	if _, ok := event.SignUp[uid]; !ok{
+	if _, ok := event.SignUp[uid]; !ok {
 		Errors(w, ErrForbidden("user not join this event", ErrCode_UserNotSignUp))
 		return
 	}
@@ -525,5 +524,3 @@ func MyJoinEvent(w http.ResponseWriter, r *http.Request) {
 	Push(w, "event list", es)
 
 }
-
-

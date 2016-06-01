@@ -5,17 +5,17 @@ import (
 )
 
 type Paging struct {
-	Page                int
-	Limit	 			int
-	Offset              int
-	TotalPages          int
-	Count               int
+	Page       int
+	Limit      int
+	Offset     int
+	TotalPages int
+	Count      int
 }
 
 var DefaultLimt = 10
 
 func NewPaging(count, limit int) *Paging {
-	return &Paging{Count:count, Limit:limit}
+	return &Paging{Count: count, Limit: limit}
 }
 
 func (p *Paging) SetPage(page int) *Paging {
@@ -47,4 +47,3 @@ func (p *Paging) Calc() *Paging {
 
 	return p
 }
-

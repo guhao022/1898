@@ -8,13 +8,13 @@ import (
 	"net/http"
 )
 
-type Token struct {}
+type Token struct{}
 
 func New() *Token {
 	return &Token{}
 }
 
-func (t *Token) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc){
+func (t *Token) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	if r.RequestURI == "/login" || r.RequestURI == "/register" || r.RequestURI == "/regkey" {
 		next(w, r)
@@ -49,4 +49,3 @@ func (t *Token) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.Hand
 
 	next(w, r)
 }
-

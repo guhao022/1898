@@ -18,7 +18,7 @@ func New() *Log {
 	return &Log{}
 }
 
-func (l *Log) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc){
+func (l *Log) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	start := time.Now()
 
 	next(w, r)
@@ -46,4 +46,3 @@ func RemoteIP(r *http.Request) string {
 	}
 	return "127.0.0.1"
 }
-

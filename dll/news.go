@@ -1,11 +1,11 @@
 package dll
 
 import (
-	"net/http"
 	"1898/dal"
-	"time"
-	"strconv"
 	"1898/utils"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 // @name 添加新闻
@@ -182,7 +182,7 @@ func NewsList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Push(w, strconv.Itoa(p.TotalPages) , news)
+	Push(w, strconv.Itoa(p.TotalPages), news)
 }
 
 //@name 新闻信息
@@ -212,4 +212,3 @@ func FindNews(w http.ResponseWriter, r *http.Request) {
 
 	Push(w, "get news success", n)
 }
-

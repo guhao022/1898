@@ -1,7 +1,8 @@
 package env
+
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func Test_Env(t *testing.T) {
