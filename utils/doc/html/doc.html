@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>apitest</title>
+
+</head>
+<link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+<style type="text/css">
+
+    .main{
+        width: 90%;
+        margin: 30px auto;
+        min-width: 960px;
+        max-width: 1096px;
+    }
+    .fs{
+        font-size: 100% !important;
+    }
+    .bs-callout-danger {
+        border-left-color: #ce4844 !important;
+    }
+    .bs-callout-info {
+        border-left-color: #1b809e !important;
+    }
+    .bs-callout {
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid #eee;
+        border-left-width: 5px;
+        border-radius: 3px;
+    }
+    .sider{
+        cursor: pointer;
+        margin: 0 auto;
+        width: inherit;
+    }
+    .method{
+        float: left;
+        background: #5cb85c;
+        padding: 5px;
+        color: #ffffff;
+        border-radius: .25em 0 0 .25em;
+    }
+    .uri{
+        float: left;
+        background-color: #d9edf7;
+        padding: 5px 20px;
+        border-radius: 0 .25em .25em 0;
+        width: inherit;
+    }
+    .box{
+        width: 90%;
+        clear: both;
+        border-radius: 0 0 .25em .25em;
+        margin: 0 auto;
+        padding-top: 5px;
+        display: none;
+    }
+</style>
+
+<body>
+<div class="main">
+    <?php $t=0 ?>
+    @foreach($doc as $docc)
+    @foreach($docc as $comment)
+    <?php $t++ ?>
+    <div class="sider" onclick="showBox({{$t}})" >
+        <div class="method pull-left">{{strtoupper($comment["comment"]["method"]["0"])}}</div>
+        <div class="uri">
+            <div class="pull-right">{{$comment["comment"]["name"]["0"]}}</div>
+            <div class="pull-left">{{$comment["comment"]["uri"]["0"]}}</div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="box" id="test_box_{{$t}}">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-1 control-label">Name</label>
+                <div class="col-md-4">
+                    <h5><span class="label-info label fs">{{$comment["comment"]["name"]["0"]}}</span></h5>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-1 control-label">Host</label>
+                <div class="col-md-4">
+                    <select id="host_{{$t}}" class="form-control">
+                        <option value="http://dapi.wordhi.com">测试服务器</option>
+                        <option value="http://localhost">本地服务器</option>
+                    </select>
+                </div>
+
+                <label class="col-md-1 control-label">Port</label>
+                <div class="col-md-2">
+                    <input type="text" id="port_{{$t}}" class="form-control auth-field" value="80">
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-1 control-label">Uri</label>
+                <div class="col-md-4">
+                    <input type="text" id="uri_{{$t}}" class="form-control auth-field" value="{{$comment["comment"]["uri"]["0"]}}">
+                </div>
+
+                <label class="col-md-1 control-label">Method</label>
+                <div class="col-md-2">
+                    <input type="text" id="method_{{$t}}" class="form-control auth-field" value="{{strtoupper($comment["comment"]["method"]["0"])}}">
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label class="col-md-1 control-label">AppId</label>
+                <div class="col-md-4">
+                    <input type="text" id="appid_{{$t}}" class="form-control auth-field" value="4cDdAnFsFCfsMWMl6tpjiafNovQ6im">
+                </div>
+
+            </div>
+            <div class="bs-callout bs-callout-info">
+                <h3 class="color1">Request : </h3>
+                @if(isset($comment["comment"]["param"]))
+                @foreach($comment["comment"]["param"] as $param)
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{{$param}}</label>
+                    <div class="col-md-4">
+                        <input type="text" id="{{$param.$t}}" name="{{$param}}" class="form-control auth-field">
+                    </div>
+                </div>
+                @endforeach
+                <?php $p = json_encode($comment["comment"]["param"]) ?>
+                @endif
+                <button type="button" onclick="test({{$t}},{{$p}})" class="btn btn-primary col-sm-offset-1"> 提交 </button>
+            </div>
+
+            <div class="bs-callout bs-callout-danger">
+                <div class="form-group">
+                    <label class="col-md-2 control-label">Status</label>
+                    <div class="col-md-4">
+                        <input type="text" id="status_{{$t}}" class="form-control auth-field">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label">Signature</label>
+                    <div class="col-md-9">
+                        <input type="text" id="sign_{{$t}}" class="form-control auth-field">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-2 control-label">Data</label>
+                    <div class="col-md-9">
+                        <textarea id="data_{{$t}}" rows="8" class="form-control auth-field"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+
+    </div>
+    <div class="clearfix"></div>
+    <br>
+    @endforeach
+    @endforeach
+</div>
+
+
+</body>
+<script src="//cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
+<script>
+    function showBox(t){
+        $("#test_box_"+t).toggle();
+    }
+
+    function getUrl(t){
+        var host = $("#host_"+t+" option:selected").val();
+        var port = $("#port_"+t).val();
+        var uri = $("#uri_"+t).val();
+        var url = host+":"+port+uri;
+        return url;
+    }
+
+    function test(t,p){
+        //var url = getUrl(t);
+        var host = $("#host_"+t+" option:selected").val();
+        var port = $("#port_"+t).val();
+        var uri = $("#uri_"+t).val();
+        var method = $("#method_"+t).val();
+        var appid = $("#appid_"+t).val();
+        var d = {};
+        $(p).each(function(i,v){
+            d[v] = $("#"+v+t).val();
+        });
+        d["appid"] = appid;
+        d["_host"] = host
+        d["_uri"] = uri;
+        d["_port"] = port;
+        d["_method"] = method;
+        console.log(d);
+        $.ajax({
+            type: "POST",
+            url: "/test",
+            asyc: true,
+            data: d,
+            success: function (data) {
+                console.log(data);
+                $("#status_"+t).val(data.code);
+                $("#sign_"+t).val(data.signature);
+                $("#data_"+t).val(JSON.stringify(data.data, null, "\t"));
+                //console.log(JSON.stringify(data, null, "\t"));
+            },
+            dataType: "json"
+        });
+    }
+</script>
+
+</html>

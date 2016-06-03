@@ -46,6 +46,7 @@ const (
 	ErrCode_EventMissParamTitle
 	ErrCode_EventMissParamDetail
 	ErrCode_EventMissParamAddr
+	ErrCode_EventMissParamImage
 	ErrCode_EventMissParamStart
 	ErrCode_EventMissParamPrice
 	ErrCode_EventMissParamTotal

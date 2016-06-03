@@ -65,9 +65,9 @@ func (e *Event) AddEvent() error {
 }
 
 // 根据ID更改活动信息
-func (e *Event) UpdateById(id string) error {
+func (e *Event) UpdateById() error {
 	c := e.mgo()
-	c.Query = bson.M{"_id": bson.IsObjectIdHex(id)}
+	c.Query = bson.M{"_id": e.Id}
 	c.Change = bson.M{"$set": e}
 
 	return c.Update()
@@ -85,5 +85,7 @@ func (e *Event) DeleteById(id string) error {
 func (e *Event) DelById(id string) error {
 	e.Deleted = time.Now()
 
-	return e.UpdateById(id)
+	e.Id = bson.ObjectIdHex(id)
+
+	return e.UpdateById()
 }

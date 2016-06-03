@@ -91,6 +91,7 @@ type Event struct {
 	Uid      bson.ObjectId     `bson:"uid" json:"uid"`
 	Username string            `bson:"username" json:"username"`
 	Title    string            `bson:"title" json:"title"`   // 活动标题
+	Image 	 string            `json:"image"`
 	Detail   string            `bson:"detail" json:"detail"` // 活动详情
 	Addr     string            `bson:"addr" json:"addr"`     // 活动地址
 	Price    int               `bson:"price" json:"price"`   // 活动价格

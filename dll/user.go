@@ -213,7 +213,47 @@ func CreateRoot(w http.ResponseWriter, r *http.Request) {
 	Push(w, "register success", u)
 }
 
-// @name 修改密码
+// @name 找回密码
+func FindPassword(w http.ResponseWriter, r *http.Request) {
+
+	phone := r.FormValue("phone")
+
+	if phone == "" {
+		Errors(w, ErrMissParam("phone", ErrCode_UserMissParamPhone))
+
+		return
+	}
+
+	password := r.FormValue("password")
+
+	if password == "" {
+		Errors(w, ErrMissParam("password", ErrCode_UserMissParamPassword))
+
+		return
+	}
+
+	u := new(dal.User)
+	u.Phone = phone
+
+	err := u.FindByPhone()
+
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	u.Password = utils.Md5(utils.Md5(password))
+
+	err = u.UpdateById()
+	if err != nil {
+		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
+		return
+	}
+
+	Push(w, "update password success", "ok")
+
+}
+
 func EditPassword(w http.ResponseWriter, r *http.Request) {
 	uid := r.FormValue("uid")
 
@@ -270,6 +310,7 @@ func EditPassword(w http.ResponseWriter, r *http.Request) {
 	Push(w, "update password success", "ok")
 
 }
+
 
 // @name 修改用户信息
 func EditUser(w http.ResponseWriter, r *http.Request) {

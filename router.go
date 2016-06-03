@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"net/http"
+	"1898/utils/doc"
 )
 
 func HttpRun(addr string) {
@@ -18,9 +19,11 @@ func HttpRun(addr string) {
 	r.HandleFunc("/rootlogin", dll.RootLogin).Methods("POST")
 	r.HandleFunc("/register", dll.Register).Methods("POST")
 	r.HandleFunc("/regkey", dll.CheckRegKey).Methods("POST")
+	r.HandleFunc("/upload", dll.Upload).Methods("POST")
 
 	r.HandleFunc("/user/newroot", dll.CreateRoot).Methods("POST")
 	r.HandleFunc("/user/editpwd", dll.EditPassword).Methods("POST")
+	r.HandleFunc("/user/findpwd", dll.FindPassword).Methods("POST")
 	r.HandleFunc("/user/edit", dll.EditUser).Methods("POST")
 	r.HandleFunc("/user/info", dll.GetUserByID).Methods("POST")
 	r.HandleFunc("/user/byphone", dll.GetUserByPhone).Methods("POST")
@@ -55,7 +58,7 @@ func HttpRun(addr string) {
 	r.HandleFunc("/news/add", dll.AddNews).Methods("POST")
 	r.HandleFunc("/news/one", dll.FindNews).Methods("POST")
 	r.HandleFunc("/news/edit", dll.EditNews).Methods("POST")
-	r.HandleFunc("/news/list", dll.NewsList).Methods("POST", "GET")
+	r.HandleFunc("/news/list", dll.NewsList).Methods("POST")
 	r.HandleFunc("/news/del", dll.DelNews).Methods("POST")
 
 	// 文件服务器
@@ -63,6 +66,10 @@ func HttpRun(addr string) {
 	//http.Handle("/doc/", http.StripPrefix("/doc/", http.FileServer(http.Dir("/usr/share/doc"))))
 
 	r.Handle("/image/{name}", http.StripPrefix("/image/", http.FileServer(http.Dir("image"))))
+
+	// 开启文档服务
+	doc := doc.New("./dll").SetHost("192.168.1.150", "9900")
+	r.HandleFunc("/doc", doc.Handler).Methods("GET")
 
 	n := negroni.New()
 	n.Use(logg.New())

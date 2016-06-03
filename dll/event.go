@@ -77,6 +77,14 @@ func NewEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	image := r.FormValue("image")
+
+	if image == "" {
+		Errors(w, ErrMissParam("image", ErrCode_EventMissParamImage))
+
+		return
+	}
+
 	total, err := strconv.Atoi(r.FormValue("total"))
 
 	if err != nil {
@@ -106,8 +114,9 @@ func NewEvent(w http.ResponseWriter, r *http.Request) {
 	var event = &dal.Event{}
 
 	event.Uid = u.Id
-	event.Username = u.Username
+	event.Username = u.Nickname
 	event.Title = title
+	event.Image = image
 	event.Detail = detail
 	event.Addr = addr
 	event.Price = price
@@ -219,13 +228,14 @@ func EditEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	event.Id = ObjectIdHex(eid)
 	event.Title = title
 	event.Detail = detail
 	event.Addr = addr
 	event.Price = price
 	event.Total = total
 
-	err = event.UpdateById(eid)
+	err = event.UpdateById()
 
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
@@ -320,7 +330,8 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 
 	// 是否已过报名期
 	now := time.Now().Unix()
-	if now-event.Start < 2*60*60 {
+
+	if event.Start - 2*60*60 <= now {
 		Errors(w, ErrForbidden("end of registration time", ErrCode_TimeOver))
 		return
 	}
@@ -346,9 +357,13 @@ func RegEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	event.SignUp[uid] = u.Nickname
+	var sign = make(map[string]string, 0)
 
-	err = event.UpdateById(eid)
+	sign[uid] = u.Nickname
+	event.Id = ObjectIdHex(eid)
+	event.SignUp = sign
+
+	err = event.UpdateById()
 
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
@@ -448,7 +463,7 @@ func CancelEvent(w http.ResponseWriter, r *http.Request) {
 
 	delete(event.SignUp, uid)
 
-	err = event.UpdateById(eid)
+	err = event.UpdateById()
 	if err != nil {
 		Errors(w, ErrInternalServer(err.Error(), ErrCode_InternalServer))
 		return
@@ -472,7 +487,7 @@ func MyPublishEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var event *dal.Event
+	var event = new(dal.Event)
 
 	query := bson.M{"uid": ObjectIdHex(uid)}
 
