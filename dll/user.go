@@ -646,7 +646,7 @@ func SendSMS(w http.ResponseWriter, r *http.Request) {
 	var resp string
 	var sms_free_sign_name string
 
-	sms_free_sign_name = "保定一八九八"
+	sms_free_sign_name = "短信验证"
 
 	switch types {
 	case "register":
