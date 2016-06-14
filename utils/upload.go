@@ -35,7 +35,7 @@ func Upload(r *http.Request) (string, error) {
 	bytes, err := ioutil.ReadAll(file)
 
 	//写到服务端本地文件中
-	outputFilePath := "./image/" + fileName
+	outputFilePath := "/var/www/html/1898/public/image/" + fileName
 	err = ioutil.WriteFile(outputFilePath, bytes, os.ModePerm)
 	if err != nil {
 		return "", err
